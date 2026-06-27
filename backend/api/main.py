@@ -31,7 +31,12 @@ DATABASE_URL = os.getenv(
 )
 ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "mima123456")
 JWT_SECRET = os.getenv("JWT_SECRET", "hajijiu_jwt_secret_2026")
-DEEPSEEK_API_KEY = os.getenv("DEEPSEEK_API_KEY", "")
+
+# DeepSeek API Key 从数据库读取（管理员后台配置）
+def get_deepseek_api_key():
+    """从数据库获取 DeepSeek API Key"""
+    return get_setting("deepseek_api_key", "")
+
 OPENCLAW_API_KEY = os.getenv("OPENCLAW_API_KEY", "")
 WEBHOOK_URL = os.getenv("WEBHOOK_URL", "")
 
@@ -651,8 +656,9 @@ def _build_memory_summary(records: list, max_items: int = 6) -> str:
 
 def _call_deepseek_chat(user_id: int, user_message: str, ai_config: dict) -> dict:
     """调用 DeepSeek 日常聊天"""
-    if not DEEPSEEK_API_KEY:
-        return {"reply": "AI服务暂未配置，请联系管理员。", "tokens": 0}
+    deepseek_api_key = get_deepseek_api_key()
+    if not deepseek_api_key:
+        return {"reply": "AI服务暂未配置，请联系管理员在后台设置 DeepSeek API Key。", "tokens": 0}
 
     with get_db() as conn:
         cur = conn.cursor()
@@ -671,9 +677,10 @@ def _call_deepseek_chat(user_id: int, user_message: str, ai_config: dict) -> dic
     messages.append({"role": "user", "content": user_message})
 
     try:
+        deepseek_api_key = get_deepseek_api_key()
         resp = http_requests.post(
             "https://api.deepseek.com/chat/completions",
-            headers={"Authorization": f"Bearer {DEEPSEEK_API_KEY}", "Content-Type": "application/json"},
+            headers={"Authorization": f"Bearer {deepseek_api_key}", "Content-Type": "application/json"},
             json={"model": "deepseek-chat", "messages": messages, "max_tokens": 256, "temperature": 0.8},
             timeout=30,
         )
@@ -1705,6 +1712,34 @@ async def admin_update_settings(req: AdminSettingsRequest, admin: dict = Depends
         if v is not None: set_setting(k, str(v)); updates[k] = v
     if not updates: return error_response("没有需要更新的设置")
     return success_response(updates, "设置更新成功")
+
+
+# ─── API Key 管理 ──────────────────────────────────────────────────────
+
+class ApiKeysRequest(BaseModel):
+    deepseek_api_key: str = ""
+    imagine_api_key: str = ""
+
+
+@app.get("/api/admin/settings/api-keys")
+async def admin_get_api_keys(admin: dict = Depends(get_admin_user)):
+    """获取 API Key 配置状态（不返回实际 key）"""
+    deepseek_key = get_setting("deepseek_api_key", "")
+    imagine_key = get_setting("imagine_api_key", "")
+    return success_response({
+        "deepseek_configured": bool(deepseek_key and deepseek_key != ""),
+        "imagine_configured": bool(imagine_key and imagine_key != "")
+    })
+
+
+@app.post("/api/admin/settings/api-keys")
+async def admin_set_api_keys(req: ApiKeysRequest, admin: dict = Depends(get_admin_user)):
+    """保存 API Key（存储在数据库）"""
+    if req.deepseek_api_key and req.deepseek_api_key != "••••••••••••••••":
+        set_setting("deepseek_api_key", req.deepseek_api_key)
+    if req.imagine_api_key and req.imagine_api_key != "••••••••••••••••":
+        set_setting("imagine_api_key", req.imagine_api_key)
+    return success_response(message="API Key 已保存")
 
 
 @app.post("/api/admin/change-password")
