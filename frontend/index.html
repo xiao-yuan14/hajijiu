@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>哈基玖 - 玖喵WeChat</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', sans-serif;
+  background: linear-gradient(180deg, #FFF5E6 0%, #FFECD2 50%, #FFF0DB 100%);
+  min-height: 100vh;
+  padding-bottom: 30px;
+  overflow-x: hidden;
+  position: relative;
+}
+
+/* 页面角落装饰 - 小爪印 */
+.deco-paw {
+  position: fixed; opacity: 0.08; pointer-events: none; z-index: 0;
+}
+.deco-paw.tl { top: 80px; left: 12px; transform: rotate(-20deg); }
+.deco-paw.br { bottom: 100px; right: 12px; transform: rotate(30deg); }
+
+/* 顶部栏 */
+.top-bar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 20px 12px; position: relative; z-index: 2;
+}
+.logo {
+  font-size: 24px; font-weight: 800; color: #E85D3A;
+  letter-spacing: 2px; text-shadow: 1px 1px 2px rgba(232,93,58,0.15);
+  display: flex; align-items: center; gap: 8px;
+}
+.user-info { display: flex; align-items: center; gap: 8px; }
+.user-name { font-size: 14px; color: #8B7355; font-weight: 500; }
+.user-avatar {
+  width: 36px; height: 36px; border-radius: 50%;
+  background: linear-gradient(135deg, #FFB347, #FF8C42);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; box-shadow: 0 2px 8px rgba(255,140,66,0.3);
+}
+
+/* 玖喵看板娘 - 右上角坐着的小猫 */
+.kitty-corner {
+  position: absolute; top: 6px; right: 12px; z-index: 3;
+  animation: kittyBreathe 4s ease-in-out infinite;
+}
+@keyframes kittyBreathe {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
+}
+.kitty-corner svg { width: 48px; height: 48px; }
+/* 眨眼动画 */
+.kitty-eye-blink { animation: blink 4s infinite; }
+@keyframes blink {
+  0%, 90%, 100% { transform: scaleY(1); }
+  95% { transform: scaleY(0.1); }
+}
+
+/* 弧线分隔 */
+.arc-divider {
+  width: 120%; margin-left: -10%; height: 40px;
+  background: #FFFFFF; border-radius: 0 0 50% 50%;
+  margin-top: -5px; box-shadow: 0 4px 12px rgba(232,93,58,0.06);
+  position: relative; z-index: 1;
+}
+/* 弧线上小爪印装饰 */
+.arc-divider::after {
+  content: '🐾'; position: absolute; top: 12px; left: 50%;
+  transform: translateX(-50%); font-size: 10px; opacity: 0.3;
+}
+
+.content { padding: 20px 16px; max-width: 420px; margin: 0 auto; position: relative; z-index: 2; }
+
+.card {
+  background: #FFFFFF; border-radius: 18px; padding: 18px;
+  margin-bottom: 14px; box-shadow: 0 3px 14px rgba(232,93,58,0.07);
+  position: relative; overflow: hidden;
+}
+/* 卡片角落小爪印 */
+.card::before {
+  content: ''; position: absolute; top: 8px; right: 8px;
+  width: 14px; height: 14px; opacity: 0.1;
+  background: radial-gradient(circle 3px at 50% 30%, #FF8C42 100%, transparent 100%),
+              radial-gradient(circle 2px at 25% 70%, #FF8C42 100%, transparent 100%),
+              radial-gradient(circle 2px at 75% 70%, #FF8C42 100%, transparent 100%);
+}
+
+.card-title {
+  font-size: 16px; font-weight: 700; color: #5D4E3C;
+  margin-bottom: 12px; display: flex; align-items: center; gap: 6px;
+}
+.card-title .emoji { font-size: 18px; }
+
+.card-row { display: flex; gap: 12px; margin-bottom: 16px; }
+.mini-card {
+  flex: 1; background: #FFFFFF; border-radius: 16px; padding: 18px 14px;
+  box-shadow: 0 3px 12px rgba(232,93,58,0.08); text-align: center;
+  cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;
+}
+.mini-card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(232,93,58,0.15); }
+.mini-card .icon { font-size: 32px; margin-bottom: 6px; }
+.mini-card .title { font-size: 14px; font-weight: 600; color: #5D4E3C; }
+
+/* 主卡片 */
+.main-card {
+  background: #FFFFFF; border-radius: 20px; padding: 28px 20px;
+  margin-bottom: 16px; box-shadow: 0 4px 20px rgba(232,93,58,0.1);
+  position: relative; overflow: hidden; cursor: pointer;
+  transition: transform 0.2s; border: 2.5px solid #A8D8F0;
+}
+.main-card:hover { transform: translateY(-2px); }
+.main-card::before {
+  content: ''; position: absolute; top: -15px; right: -15px;
+  width: 80px; height: 80px;
+  background: radial-gradient(circle, rgba(168,216,240,0.3), transparent); border-radius: 50%;
+}
+.main-card::after {
+  content: ''; position: absolute; bottom: -10px; left: -10px;
+  width: 60px; height: 60px;
+  background: radial-gradient(circle, rgba(255,179,71,0.2), transparent); border-radius: 50%;
+}
+.main-card .card-title-text {
+  font-size: 26px; font-weight: 800; color: #E85D3A;
+  text-align: center; margin-bottom: 8px; position: relative; z-index: 1;
+}
+.main-card .card-subtitle {
+  font-size: 13px; color: #9B8B7A; text-align: center;
+  position: relative; z-index: 1; line-height: 1.6;
+}
+.main-card .cat-deco {
+  text-align: center; font-size: 40px; margin-top: 10px;
+  position: relative; z-index: 1;
+}
+
+/* 留言板 */
+.msg-list { max-height: 200px; overflow-y: auto; margin-bottom: 10px; }
+.msg-list::-webkit-scrollbar { width: 3px; }
+.msg-list::-webkit-scrollbar-thumb { background: #FFE0B2; border-radius: 3px; }
+.msg-item { display: flex; gap: 10px; padding: 10px 0; border-bottom: 1px solid #FFF0E0; }
+.msg-item:last-child { border-bottom: none; }
+.msg-avatar {
+  width: 32px; height: 32px; border-radius: 50%;
+  background: linear-gradient(135deg, #FFB347, #FF8C42);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; flex-shrink: 0;
+}
+.msg-body { flex: 1; }
+.msg-name { font-size: 12px; font-weight: 600; color: #5D4E3C; margin-bottom: 2px; }
+.msg-text { font-size: 12px; color: #8B7355; line-height: 1.5; }
+.msg-time { font-size: 10px; color: #C4B4A0; margin-top: 2px; }
+.comment-bar { display: flex; gap: 8px; margin-top: 10px; padding-top: 10px; border-top: 1px solid #FFF0E0; }
+.comment-input {
+  flex: 1; padding: 8px 12px; border: 2px solid #FFE0B2;
+  border-radius: 18px; font-size: 12px; color: #5D4E3C;
+  background: #FFFBF5; outline: none;
+}
+.comment-input:focus { border-color: #FFB347; }
+.comment-input::placeholder { color: #D4C4B0; }
+.comment-btn {
+  padding: 8px 16px; background: linear-gradient(135deg, #FFB347, #FF8C42);
+  color: #FFF; border: none; border-radius: 18px;
+  font-size: 12px; font-weight: 600; cursor: pointer;
+  transition: transform 0.15s; white-space: nowrap;
+}
+.comment-btn:hover { transform: scale(1.05); }
+.msg-empty { text-align: center; color: #C4B4A0; font-size: 12px; padding: 16px 0; }
+
+.hint { text-align: center; color: #B8A898; font-size: 13px; margin: 18px 0 16px; letter-spacing: 1px; }
+.btn-row { display: flex; gap: 12px; }
+.btn-action {
+  flex: 1; padding: 14px 0; border: none; border-radius: 14px;
+  font-size: 15px; font-weight: 600; cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.btn-action:hover { transform: translateY(-1px); }
+.btn-service { background: linear-gradient(135deg, #FFB347, #FF8C42); color: #FFF; box-shadow: 0 4px 14px rgba(255,140,66,0.35); }
+.btn-tool { background: linear-gradient(135deg, #A8D8F0, #7EC8E3); color: #FFF; box-shadow: 0 4px 14px rgba(126,200,227,0.35); }
+
+/* 管理员入口 */
+.admin-link {
+  position: fixed; bottom: 80px; right: 16px; z-index: 99;
+  width: 36px; height: 36px; border-radius: 50%;
+  background: #F5F0EB; display: flex; align-items: center; justify-content: center;
+  text-decoration: none; font-size: 16px; opacity: 0.4;
+  transition: opacity 0.2s;
+}
+.admin-link:hover { opacity: 0.8; }
+
+/* ========== 公告弹窗 ========== */
+.announcement-overlay {
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.5); z-index: 500;
+  display: none; align-items: center; justify-content: center;
+  opacity: 0; transition: opacity 0.3s;
+}
+.announcement-overlay.show { display: flex; opacity: 1; }
+.announcement-card {
+  background: #FFF; border-radius: 22px; padding: 28px 22px 22px;
+  width: 88%; max-width: 360px; position: relative;
+  box-shadow: 0 12px 48px rgba(0,0,0,0.2);
+  animation: annSlideUp 0.35s ease-out;
+}
+@keyframes annSlideUp { from { transform: translateY(40px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+.announcement-badge { display: inline-block; padding: 3px 10px; border-radius: 10px; font-size: 11px; font-weight: 700; margin-bottom: 10px; }
+.announcement-badge.important { background: #FFEBEE; color: #E53935; }
+.announcement-badge.normal { background: #FFF3E0; color: #FF8C42; }
+.announcement-title { font-size: 20px; font-weight: 800; color: #5D4E3C; margin-bottom: 12px; line-height: 1.4; }
+.announcement-content { font-size: 14px; color: #8B7355; line-height: 1.7; margin-bottom: 20px; }
+.announcement-dots { display: flex; justify-content: center; gap: 6px; margin-bottom: 14px; }
+.announcement-dot { width: 6px; height: 6px; border-radius: 50%; background: #E0D5C8; cursor: pointer; transition: all 0.2s; }
+.announcement-dot.active { background: #FFB347; width: 18px; border-radius: 3px; }
+.announcement-btns { display: flex; gap: 10px; justify-content: center; }
+.announcement-btn { padding: 12px 32px; border: none; border-radius: 20px; font-size: 14px; font-weight: 600; cursor: pointer; transition: transform 0.15s; }
+.announcement-btn:hover { transform: scale(1.03); }
+.announcement-btn.close-normal { background: linear-gradient(135deg, #FFB347, #FF8C42); color: #FFF; box-shadow: 0 3px 10px rgba(255,140,66,0.3); }
+.announcement-btn.close-important { background: #E0E0E0; color: #9E9E9E; cursor: not-allowed; }
+.announcement-btn.ack-important { background: linear-gradient(135deg, #EF5350, #E53935); color: #FFF; box-shadow: 0 3px 10px rgba(229,57,53,0.3); }
+</style>
+</head>
+<body>
+
+<!-- 角落爪印装饰 -->
+<div class="deco-paw tl">
+  <svg width="40" height="40" viewBox="0 0 40 40"><circle cx="20" cy="22" r="8" fill="#E85D3A"/><circle cx="12" cy="12" r="4" fill="#E85D3A"/><circle cx="28" cy="12" r="4" fill="#E85D3A"/><circle cx="8" cy="20" r="3.5" fill="#E85D3A"/><circle cx="32" cy="20" r="3.5" fill="#E85D3A"/></svg>
+</div>
+<div class="deco-paw br">
+  <svg width="40" height="40" viewBox="0 0 40 40"><circle cx="20" cy="22" r="8" fill="#E85D3A"/><circle cx="12" cy="12" r="4" fill="#E85D3A"/><circle cx="28" cy="12" r="4" fill="#E85D3A"/><circle cx="8" cy="20" r="3.5" fill="#E85D3A"/><circle cx="32" cy="20" r="3.5" fill="#E85D3A"/></svg>
+</div>
+
+<div class="top-bar">
+  <div class="logo">
+    <!-- 简约猫耳装饰 -->
+    <svg width="24" height="20" viewBox="0 0 24 20">
+      <polygon points="2,18 6,2 12,14" fill="#FFE5D9" stroke="#E85D3A" stroke-width="1.5" stroke-linejoin="round"/>
+      <polygon points="22,18 18,2 12,14" fill="#FFE5D9" stroke="#E85D3A" stroke-width="1.5" stroke-linejoin="round"/>
+      <polygon points="6,6 7.5,3 9,7" fill="#FFB6C1" opacity="0.6"/>
+      <polygon points="18,6 16.5,3 15,7" fill="#FFB6C1" opacity="0.6"/>
+    </svg>
+    哈基玖
+  </div>
+  <div class="user-info">
+    <span class="user-name" id="userName">小源同学</span>
+    <div class="user-avatar">🐱</div>
+  </div>
+  <!-- 右上角玖喵看板娘 -->
+  <div class="kitty-corner">
+    <svg viewBox="0 0 100 90" width="48" height="43">
+      <!-- 耳朵 -->
+      <polygon points="22,35 18,8 38,28" fill="#FFE5D9" stroke="#E85D3A" stroke-width="2" stroke-linejoin="round"/>
+      <polygon points="78,35 82,8 62,28" fill="#FFE5D9" stroke="#E85D3A" stroke-width="2" stroke-linejoin="round"/>
+      <polygon points="24,30 22,14 34,27" fill="#FFB6C1" opacity="0.5"/>
+      <polygon points="76,30 78,14 66,27" fill="#FFB6C1" opacity="0.5"/>
+      <!-- 脸 -->
+      <ellipse cx="50" cy="52" rx="32" ry="28" fill="#FFE5D9" stroke="#E85D3A" stroke-width="2"/>
+      <!-- 眼睛 -->
+      <g class="kitty-eye-blink" style="transform-origin:38px 48px;">
+        <ellipse cx="38" cy="48" rx="5" ry="5.5" fill="#333"/>
+        <circle cx="40" cy="46" r="1.5" fill="#FFF"/>
+      </g>
+      <g class="kitty-eye-blink" style="transform-origin:62px 48px;">
+        <ellipse cx="62" cy="48" rx="5" ry="5.5" fill="#333"/>
+        <circle cx="64" cy="46" r="1.5" fill="#FFF"/>
+      </g>
+      <!-- 腮红 -->
+      <ellipse cx="30" cy="56" rx="7" ry="4" fill="#FFB6C1" opacity="0.4"/>
+      <ellipse cx="70" cy="56" rx="7" ry="4" fill="#FFB6C1" opacity="0.4"/>
+      <!-- 嘴巴 -->
+      <path d="M 44 60 Q 50 65 56 60" fill="none" stroke="#E85D3A" stroke-width="1.5" stroke-linecap="round"/>
+      <!-- 胡须 -->
+      <line x1="20" y1="52" x2="8" y2="49" stroke="#E85D3A" stroke-width="1" opacity="0.5"/>
+      <line x1="20" y1="56" x2="8" y2="58" stroke="#E85D3A" stroke-width="1" opacity="0.5"/>
+      <line x1="80" y1="52" x2="92" y2="49" stroke="#E85D3A" stroke-width="1" opacity="0.5"/>
+      <line x1="80" y1="56" x2="92" y2="58" stroke="#E85D3A" stroke-width="1" opacity="0.5"/>
+    </svg>
+  </div>
+</div>
+
+<div class="arc-divider"></div>
+
+<div class="content">
+  <div class="card-row">
+    <div class="mini-card" style="cursor:default;">
+      <div class="icon">📋</div>
+      <div class="title">留言板</div>
+    </div>
+    <div class="mini-card">
+      <div class="icon">📨</div>
+      <div class="title">消息接受板</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><span class="emoji">📋</span> 公共留言板</div>
+    <div class="msg-list" id="msgList">
+      <div style="text-align:center;color:#C4B4A0;font-size:12px;padding:10px 0;">加载中…</div>
+    </div>
+    <div class="comment-bar">
+      <input type="text" class="comment-input" id="commentInput" placeholder="说点什么…">
+      <button class="comment-btn" onclick="postComment()">发送</button>
+    </div>
+  </div>
+
+  <div class="main-card" onclick="location.href='home.html'">
+    <div class="card-title-text">玖喵_WeChat</div>
+    <div class="card-subtitle">你的专属AI伙伴<br>温暖陪伴，从每一次对话开始 ✨</div>
+    <div class="cat-deco">🐾</div>
+  </div>
+
+  <div class="hint">还在更新中……</div>
+
+  <div class="btn-row">
+    <button class="btn-action btn-service" onclick="location.href='modules.html'">服务专栏</button>
+    <button class="btn-action btn-tool" onclick="location.href='modules.html'">工具专栏</button>
+  </div>
+</div>
+
+<!-- 公告弹窗 -->
+<div class="announcement-overlay" id="annOverlay">
+  <div class="announcement-card" id="annCard">
+    <div class="announcement-badge" id="annBadge"></div>
+    <div class="announcement-title" id="annTitle"></div>
+    <div class="announcement-content" id="annContent"></div>
+    <div class="announcement-dots" id="annDots"></div>
+    <div class="announcement-btns" id="annBtns"></div>
+  </div>
+</div>
+
+<!-- 管理员入口 -->
+<a class="admin-link" href="admin.html">🛡️</a>
+
+<script>
+// ========== 留言板（主页公共留言 board_type=home）==========
+const BOARD_KEY = 'hajijiu_messages_home';
+
+async function fetchMessages() {
+  const raw = localStorage.getItem(BOARD_KEY);
+  if (raw) return JSON.parse(raw);
+  const defaults = [
+    { name: '系统管理员', avatar: '🛡️', text: '欢迎来到哈基玖公共留言板！', time: '2026-06-27 10:00' },
+    { name: '小源同学', avatar: '🧑', text: '这个平台太棒了！', time: '2026-06-26 18:30' },
+    { name: '玖喵', avatar: '😺', text: '喵～大家好呀！', time: '2026-06-25 09:15' },
+  ];
+  localStorage.setItem(BOARD_KEY, JSON.stringify(defaults));
+  return defaults;
+}
+
+async function postMessageAPI(payload) {
+  const messages = await fetchMessages();
+  messages.unshift(payload);
+  localStorage.setItem(BOARD_KEY, JSON.stringify(messages));
+  return payload;
+}
+
+function renderMessages(messages) {
+  const list = document.getElementById('msgList');
+  if (!messages || messages.length === 0) { list.innerHTML = '<div class="msg-empty">还没有留言，来抢沙发吧～</div>'; return; }
+  list.innerHTML = messages.map(m => `
+    <div class="msg-item">
+      <div class="msg-avatar">${m.avatar||'💬'}</div>
+      <div class="msg-body">
+        <div class="msg-name">${m.name}</div>
+        <div class="msg-text">${m.text}</div>
+        <div class="msg-time">${m.time}</div>
+      </div>
+    </div>`).join('');
+}
+
+async function postComment() {
+  const input = document.getElementById('commentInput');
+  const text = input.value.trim();
+  if (!text) return;
+  const userName = localStorage.getItem('hajijiu_userName') || '小源同学';
+  const now = new Date();
+  const ts = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+  await postMessageAPI({ name: userName, avatar: '🧑', text, time: ts });
+  input.value = '';
+  const messages = await fetchMessages();
+  renderMessages(messages);
+}
+
+// ========== 公告弹窗 ==========
+const ANN_KEY = 'hajijiu_announcements';
+const ANN_SESSION_KEY = 'hajijiu_ann_closed_ids';
+
+async function fetchAnnouncements() {
+  const raw = localStorage.getItem(ANN_KEY);
+  if (raw) return JSON.parse(raw);
+  const defaults = [
+    { id: 'ann_001', title: '🎉 哈基玖正式上线！', content: '欢迎来到哈基玖！玖喵WeChat已经正式上线，快去绑定微信，和AI伙伴开始聊天吧～\n\n如有问题欢迎在留言板反馈！', type: 'important', time: '2026-06-27' },
+    { id: 'ann_002', title: '📌 新模块上线通知', content: '绘画模块、语音模块已上架模块商店，快去体验吧！', type: 'normal', time: '2026-06-26' },
+    { id: 'ann_003', title: '🛠️ 系统维护公告', content: '6月28日凌晨2:00-4:00将进行系统维护，届时部分功能可能暂时不可用。', type: 'important', time: '2026-06-25' }
+  ];
+  localStorage.setItem(ANN_KEY, JSON.stringify(defaults));
+  return defaults;
+}
+
+let currentAnnIndex = 0;
+let annList = [];
+
+function showAnnouncement(index) {
+  if (!annList || annList.length === 0) return;
+  currentAnnIndex = Math.max(0, Math.min(index, annList.length - 1));
+  const ann = annList[currentAnnIndex];
+  document.getElementById('annBadge').className = 'announcement-badge ' + ann.type;
+  document.getElementById('annBadge').textContent = ann.type === 'important' ? '🔴 重要公告' : '📢 公告';
+  document.getElementById('annTitle').textContent = ann.title;
+  document.getElementById('annContent').innerHTML = ann.content.replace(/\n/g, '<br>');
+  const dots = document.getElementById('annDots');
+  dots.innerHTML = annList.length > 1 ? annList.map((_, i) => `<div class="announcement-dot ${i === currentAnnIndex ? 'active' : ''}" onclick="showAnnouncement(${i})"></div>`).join('') : '';
+  const isImportant = ann.type === 'important';
+  document.getElementById('annBtns').innerHTML = isImportant
+    ? `<button class="announcement-btn close-important">关闭</button><button class="announcement-btn ack-important" onclick="closeAnnouncement('${ann.id}')">已阅读</button>`
+    : `<button class="announcement-btn close-normal" onclick="closeAnnouncement('${ann.id}')">关闭</button>`;
+}
+
+function closeAnnouncement(annId) {
+  const closed = JSON.parse(sessionStorage.getItem(ANN_SESSION_KEY) || '[]');
+  if (!closed.includes(annId)) closed.push(annId);
+  sessionStorage.setItem(ANN_SESSION_KEY, JSON.stringify(closed));
+  const remaining = annList.filter(a => !closed.includes(a.id));
+  if (remaining.length > 0) { annList = remaining; showAnnouncement(0); }
+  else { document.getElementById('annOverlay').classList.remove('show'); }
+}
+
+// ========== 初始化 ==========
+(async function init() {
+  const savedName = localStorage.getItem('hajijiu_userName');
+  if (savedName) document.getElementById('userName').textContent = savedName;
+  else localStorage.setItem('hajijiu_userName', '小源同学');
+  const messages = await fetchMessages();
+  renderMessages(messages);
+  const allAnn = await fetchAnnouncements();
+  const closedIds = JSON.parse(sessionStorage.getItem(ANN_SESSION_KEY) || '[]');
+  annList = allAnn.filter(a => !closedIds.includes(a.id));
+  if (annList.length > 0) { showAnnouncement(0); document.getElementById('annOverlay').classList.add('show'); }
+})();
+
+document.getElementById('annOverlay').addEventListener('click', function(e) {
+  if (e.target === this) {
+    const ann = annList[currentAnnIndex];
+    if (ann && ann.type !== 'important') closeAnnouncement(ann.id);
+  }
+});
+let touchStartX = 0;
+document.getElementById('annCard').addEventListener('touchstart', function(e) { touchStartX = e.touches[0].clientX; });
+document.getElementById('annCard').addEventListener('touchend', function(e) {
+  const diff = e.changedTouches[0].clientX - touchStartX;
+  if (Math.abs(diff) > 50) {
+    if (diff < 0 && currentAnnIndex < annList.length - 1) showAnnouncement(currentAnnIndex + 1);
+    else if (diff > 0 && currentAnnIndex > 0) showAnnouncement(currentAnnIndex - 1);
+  }
+});
+</script>
+</body>
+</html>

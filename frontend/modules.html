@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>模块商店 - 玖喵WeChat</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', sans-serif;
+  background: linear-gradient(180deg, #FFF5E6 0%, #FFECD2 50%, #FFF0DB 100%);
+  min-height: 100vh;
+  padding-bottom: 80px;
+  overflow-x: hidden;
+}
+
+/* 顶部栏 */
+.top-bar {
+  background: #FFFFFF;
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 2px 8px rgba(232,93,58,0.06);
+}
+.page-title {
+  font-size: 20px;
+  font-weight: 800;
+  color: #E85D3A;
+}
+.points-badge {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: #FFF3E0;
+  padding: 6px 14px;
+  border-radius: 16px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #FF8C42;
+}
+.hex-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  background: #FF8C42;
+  clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+  color: #FFF;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.content {
+  padding: 16px;
+  max-width: 420px;
+  margin: 0 auto;
+}
+
+/* 模块卡片 */
+.module-card {
+  background: #FFFFFF;
+  border-radius: 18px;
+  padding: 20px;
+  margin-bottom: 14px;
+  box-shadow: 0 3px 14px rgba(232,93,58,0.07);
+  transition: transform 0.2s;
+}
+.module-card:hover { transform: translateY(-2px); }
+.module-top {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  margin-bottom: 12px;
+}
+.module-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+  flex-shrink: 0;
+}
+.module-icon.orange { background: linear-gradient(135deg, #FFE0B2, #FFCC80); }
+.module-icon.blue { background: linear-gradient(135deg, #BBDEFB, #90CAF9); }
+.module-icon.pink { background: linear-gradient(135deg, #F8BBD0, #F48FB1); }
+.module-info { flex: 1; }
+.module-name {
+  font-size: 17px;
+  font-weight: 700;
+  color: #5D4E3C;
+  margin-bottom: 4px;
+}
+.module-func {
+  font-size: 20px;
+  font-weight: 800;
+  color: #E85D3A;
+  margin-bottom: 4px;
+}
+.module-model {
+  font-size: 12px;
+  color: #A89880;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.module-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 12px;
+  border-top: 1px solid #FFF0E0;
+}
+.module-price {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 16px;
+  font-weight: 700;
+  color: #FF8C42;
+}
+.module-price .hex-small {
+  display: inline-flex;
+  width: 16px;
+  height: 16px;
+  background: #FF8C42;
+  clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+  font-size: 9px;
+  color: #FFF;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+}
+.buy-btn {
+  padding: 8px 22px;
+  background: linear-gradient(135deg, #FFB347, #FF8C42);
+  color: #FFF;
+  border: none;
+  border-radius: 16px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.15s;
+  box-shadow: 0 2px 8px rgba(255,140,66,0.25);
+}
+.buy-btn:hover { transform: scale(1.05); }
+.buy-btn.owned {
+  background: #E8F5E9;
+  color: #4CAF50;
+  box-shadow: none;
+  cursor: default;
+}
+
+/* 说明 */
+.info-text {
+  text-align: center;
+  font-size: 13px;
+  color: #B8A898;
+  margin-top: 8px;
+  padding: 12px 0;
+}
+
+/* 底部导航 */
+.nav-bar {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  background: #FFFFFF;
+  display: flex;
+  justify-content: space-around;
+  padding: 8px 0 12px;
+  box-shadow: 0 -2px 12px rgba(0,0,0,0.06);
+  border-radius: 18px 18px 0 0;
+  z-index: 100;
+}
+.nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-decoration: none;
+  color: #B8A898;
+  font-size: 11px;
+  gap: 2px;
+  padding: 2px 10px;
+  border-radius: 12px;
+  transition: all 0.2s;
+}
+.nav-item .nav-icon { font-size: 22px; }
+.nav-item.active {
+  color: #E85D3A;
+  background: rgba(232,93,58,0.08);
+  font-weight: 600;
+}
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <div class="page-title">🧩 模块商店</div>
+  <div class="points-badge">
+    <span class="hex-icon">⬡</span>
+    <span id="pointsDisplay">100</span>
+  </div>
+</div>
+
+<div class="content">
+  <div class="module-card">
+    <div class="module-top">
+      <div class="module-icon orange">💬</div>
+      <div class="module-info">
+        <div class="module-name">聊天增强模块</div>
+        <div class="module-func">让AI对话更自然有趣</div>
+        <div class="module-model">🤖 调用模型：DeepSeek-Chat</div>
+      </div>
+    </div>
+    <div class="module-bottom">
+      <div class="module-price"><span class="hex-small">⬡</span> 30 积分</div>
+      <button class="buy-btn owned" id="buy_chat">✅ 已购买</button>
+    </div>
+  </div>
+
+  <div class="module-card">
+    <div class="module-top">
+      <div class="module-icon blue">🎨</div>
+      <div class="module-info">
+        <div class="module-name">绘画模块</div>
+        <div class="module-func">AI创作精美图片</div>
+        <div class="module-model">🤖 调用模型：DALL-E 3</div>
+      </div>
+    </div>
+    <div class="module-bottom">
+      <div class="module-price"><span class="hex-small">⬡</span> 50 积分</div>
+      <button class="buy-btn" id="buy_draw" onclick="buyModule('drawing',50,this)">购买</button>
+    </div>
+  </div>
+
+  <div class="module-card">
+    <div class="module-top">
+      <div class="module-icon pink">🎤</div>
+      <div class="module-info">
+        <div class="module-name">语音模块</div>
+        <div class="module-func">语音对话更亲切</div>
+        <div class="module-model">🤖 调用模型：TTS-v3</div>
+      </div>
+    </div>
+    <div class="module-bottom">
+      <div class="module-price"><span class="hex-small">⬡</span> 40 积分</div>
+      <button class="buy-btn" id="buy_voice" onclick="buyModule('voice',40,this)">购买</button>
+    </div>
+  </div>
+
+  <div class="info-text">
+    <!-- 玖喵戴博士帽 -->
+    <svg viewBox="0 0 80 80" width="40" height="40" style="display:block;margin:0 auto 6px;">
+      <polygon points="16,38 13,20 28,34" fill="#FFE5D9" stroke="#E85D3A" stroke-width="1.5" stroke-linejoin="round"/>
+      <polygon points="64,38 67,20 52,34" fill="#FFE5D9" stroke="#E85D3A" stroke-width="1.5" stroke-linejoin="round"/>
+      <ellipse cx="40" cy="50" rx="24" ry="22" fill="#FFE5D9" stroke="#E85D3A" stroke-width="1.5"/>
+      <ellipse cx="33" cy="48" rx="3" ry="3.5" fill="#333"/><circle cx="34" cy="46.5" r="1" fill="#FFF"/>
+      <ellipse cx="47" cy="48" rx="3" ry="3.5" fill="#333"/><circle cx="48" cy="46.5" r="1" fill="#FFF"/>
+      <ellipse cx="26" cy="54" rx="5" ry="3" fill="#FFB6C1" opacity="0.4"/>
+      <ellipse cx="54" cy="54" rx="5" ry="3" fill="#FFB6C1" opacity="0.4"/>
+      <path d="M 36 57 Q 40 61 44 57" fill="none" stroke="#E85D3A" stroke-width="1.2" stroke-linecap="round"/>
+      <!-- 博士帽 -->
+      <polygon points="15,22 40,12 65,22 40,28" fill="#333"/>
+      <rect x="38" y="22" width="4" height="10" fill="#333"/>
+      <line x1="40" y1="32" x2="40" y2="38" stroke="#FFD700" stroke-width="1.5"/>
+      <circle cx="40" cy="38" r="2.5" fill="#FFD700"/>
+    </svg>
+    💡 用积分来购买模块，增强AI伙伴的能力
+  </div>
+</div>
+
+<!-- 底部导航 -->
+<div class="nav-bar">
+  <a class="nav-item" href="home.html"><span class="nav-icon">🏠</span><span>首页</span></a>
+  <a class="nav-item" href="friend.html"><span class="nav-icon">🐾</span><span>朋友</span></a>
+  <a class="nav-item" href="community.html"><span class="nav-icon">🌍</span><span>社区</span></a>
+  <a class="nav-item active" href="modules.html"><span class="nav-icon">🧩</span><span>模块</span></a>
+  <a class="nav-item" href="profile.html"><span class="nav-icon">👤</span><span>个人</span></a>
+</div>
+
+<script>
+const POINTS_KEY = 'hajijiu_points';
+const OWNED_KEY = 'hajijiu_owned_modules';
+
+function getPoints() {
+  return parseInt(localStorage.getItem(POINTS_KEY) || '100');
+}
+function setPoints(v) {
+  localStorage.setItem(POINTS_KEY, String(v));
+  document.getElementById('pointsDisplay').textContent = v;
+}
+function getOwned() {
+  return JSON.parse(localStorage.getItem(OWNED_KEY) || '["chat_enhance"]');
+}
+
+function buyModule(moduleId, price, btn) {
+  let points = getPoints();
+  const owned = getOwned();
+  if (owned.includes(moduleId)) return;
+
+  if (points < price) {
+    alert('积分不足！当前积分：' + points + '，需要：' + price);
+    return;
+  }
+
+  if (!confirm(`确定花费 ${price} 积分购买此模块吗？`)) return;
+
+  points -= price;
+  setPoints(points);
+  owned.push(moduleId);
+  localStorage.setItem(OWNED_KEY, JSON.stringify(owned));
+
+  btn.textContent = '✅ 已购买';
+  btn.className = 'buy-btn owned';
+  btn.onclick = null;
+}
+
+// 初始化
+document.getElementById('pointsDisplay').textContent = getPoints();
+const owned = getOwned();
+if (owned.includes('drawing')) {
+  const b = document.getElementById('buy_draw');
+  b.textContent = '✅ 已购买'; b.className = 'buy-btn owned'; b.onclick = null;
+}
+if (owned.includes('voice')) {
+  const b = document.getElementById('buy_voice');
+  b.textContent = '✅ 已购买'; b.className = 'buy-btn owned'; b.onclick = null;
+}
+</script>
+</body>
+</html>

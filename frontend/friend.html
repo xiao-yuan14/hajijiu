@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>AI伙伴设置 - 玖喵WeChat</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', sans-serif;
+  background: linear-gradient(180deg, #FFF5E6 0%, #FFECD2 50%, #FFF0DB 100%);
+  min-height: 100vh;
+  padding-bottom: 80px;
+  overflow-x: hidden;
+}
+
+.page-title {
+  text-align: center; padding: 22px 20px 4px;
+  font-size: 22px; font-weight: 800; color: #E85D3A;
+}
+.page-subtitle {
+  text-align: center; font-size: 13px; color: #B8A898; margin-bottom: 14px;
+}
+
+.content { padding: 8px 16px; max-width: 420px; margin: 0 auto; }
+
+.card {
+  background: #FFFFFF; border-radius: 18px; padding: 20px;
+  margin-bottom: 14px; box-shadow: 0 3px 14px rgba(232,93,58,0.07);
+}
+.card-title {
+  font-size: 16px; font-weight: 700; color: #5D4E3C;
+  margin-bottom: 14px; display: flex; align-items: center; gap: 6px;
+}
+.card-title .emoji { font-size: 18px; }
+
+.input-group { margin-bottom: 14px; }
+.input-group:last-child { margin-bottom: 0; }
+.input-label { font-size: 13px; color: #8B7355; font-weight: 600; margin-bottom: 6px; display: block; }
+.input-field {
+  width: 100%; padding: 12px 14px; border: 2px solid #FFE0B2; border-radius: 12px;
+  font-size: 14px; color: #5D4E3C; background: #FFFBF5; outline: none;
+  transition: border-color 0.2s;
+}
+.input-field:focus { border-color: #FFB347; box-shadow: 0 0 0 3px rgba(255,179,71,0.15); }
+.input-field::placeholder { color: #D4C4B0; }
+textarea.input-field { min-height: 80px; resize: vertical; line-height: 1.6; }
+
+.info-row { display: flex; gap: 12px; margin-bottom: 14px; }
+.info-row .input-group { flex: 1; margin-bottom: 0; }
+
+/* 记忆 */
+.memory-item {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 10px 0; border-bottom: 1px solid #FFF0E0;
+}
+.memory-item:last-child { border-bottom: none; }
+.memory-dot { width: 8px; height: 8px; border-radius: 50%; background: #FFB347; margin-top: 5px; flex-shrink: 0; }
+.memory-text { font-size: 13px; color: #8B7355; line-height: 1.5; }
+.memory-time { font-size: 11px; color: #C4B4A0; margin-top: 2px; }
+
+/* 微信绑定状态卡 */
+.wechat-bind-card {
+  background: linear-gradient(135deg, #E8F5E9, #C8E6C9);
+  border-radius: 14px; padding: 14px 16px; margin-bottom: 14px;
+  display: flex; align-items: center; gap: 12px;
+}
+.wechat-bind-card.unbound {
+  background: linear-gradient(135deg, #FFF3E0, #FFE0B2);
+}
+.wechat-bind-icon { font-size: 28px; }
+.wechat-bind-info { flex: 1; }
+.wechat-bind-status { font-size: 14px; font-weight: 700; color: #2E7D32; }
+.wechat-bind-card.unbound .wechat-bind-status { color: #E65100; }
+.wechat-bind-desc { font-size: 11px; color: #689F38; margin-top: 2px; }
+.wechat-bind-card.unbound .wechat-bind-desc { color: #BF360C; }
+.wechat-bind-btn {
+  padding: 8px 14px; border-radius: 14px; font-size: 12px;
+  font-weight: 600; cursor: pointer; border: none; transition: transform 0.15s;
+}
+.wechat-bind-btn:hover { transform: scale(1.05); }
+.wechat-bind-btn.bind { background: #07C160; color: #FFF; }
+.wechat-bind-btn.goto { background: #2E7D32; color: #FFF; }
+
+/* 测试聊天区 */
+.test-chat-area {
+  background: #FFFBF5; border-radius: 14px; padding: 14px;
+  border: 1px solid #FFE0B2;
+}
+.test-chat-hint {
+  font-size: 11px; color: #C4B4A0; text-align: center; margin-bottom: 10px;
+}
+.test-chat-messages {
+  max-height: 200px; overflow-y: auto; margin-bottom: 10px;
+}
+.test-chat-messages::-webkit-scrollbar { width: 2px; }
+.test-chat-messages::-webkit-scrollbar-thumb { background: #FFE0B2; }
+.test-bubble {
+  margin-bottom: 8px; font-size: 13px; line-height: 1.5; padding: 8px 12px;
+  border-radius: 12px; max-width: 85%; word-break: break-word;
+}
+.test-bubble.ai {
+  background: #FFFFFF; color: #5D4E3C; border-top-left-radius: 2px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+}
+.test-bubble.user {
+  background: linear-gradient(135deg, #FFB347, #FF8C42); color: #FFF;
+  margin-left: auto; border-top-right-radius: 2px;
+}
+.test-chat-input-row {
+  display: flex; gap: 6px;
+}
+.test-chat-input {
+  flex: 1; padding: 8px 12px; border: 2px solid #FFE0B2; border-radius: 16px;
+  font-size: 12px; color: #5D4E3C; background: #FFF; outline: none;
+}
+.test-chat-input:focus { border-color: #FFB347; }
+.test-chat-input::placeholder { color: #D4C4B0; }
+.test-chat-send {
+  padding: 8px 14px; background: linear-gradient(135deg, #FFB347, #FF8C42);
+  color: #FFF; border: none; border-radius: 16px; font-size: 12px;
+  font-weight: 600; cursor: pointer; transition: transform 0.15s;
+}
+.test-chat-send:hover { transform: scale(1.05); }
+
+/* 保存按钮 */
+.save-btn {
+  display: block; width: 100%; padding: 14px;
+  background: linear-gradient(135deg, #FFB347, #FF8C42); color: #FFF;
+  border: none; border-radius: 14px; font-size: 15px; font-weight: 700;
+  cursor: pointer; box-shadow: 0 4px 14px rgba(255,140,66,0.35);
+  transition: transform 0.15s; margin-top: 10px;
+}
+.save-btn:hover { transform: translateY(-1px); }
+
+/* 底部导航 */
+.nav-bar {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  background: #FFFFFF; display: flex; justify-content: space-around;
+  padding: 8px 0 12px; box-shadow: 0 -2px 12px rgba(0,0,0,0.06);
+  border-radius: 18px 18px 0 0; z-index: 100;
+}
+.nav-item {
+  display: flex; flex-direction: column; align-items: center;
+  text-decoration: none; color: #B8A898; font-size: 11px;
+  gap: 2px; padding: 2px 10px; border-radius: 12px; transition: all 0.2s;
+}
+.nav-item .nav-icon { font-size: 22px; }
+.nav-item.active { color: #E85D3A; background: rgba(232,93,58,0.08); font-weight: 600; }
+</style>
+</head>
+<body>
+
+<div class="page-title">⚙️ AI伙伴设置</div>
+<div class="page-subtitle">自定义专属于你的AI朋友</div>
+
+<div class="content">
+  <!-- 微信绑定状态 -->
+  <div id="wechatBindArea"></div>
+
+  <!-- 姓名设置 -->
+  <div class="card">
+    <div class="card-title"><span class="emoji">✏️</span> 姓名</div>
+    <div class="input-group">
+      <input type="text" class="input-field" id="aiNameInput" placeholder="给AI伙伴取个名字吧" value="玖喵">
+    </div>
+  </div>
+
+  <!-- 基本信息 -->
+  <div class="card">
+    <div class="card-title"><span class="emoji">📝</span> 基本信息</div>
+    <div class="info-row">
+      <div class="input-group">
+        <label class="input-label">性别</label>
+        <input type="text" class="input-field" id="aiGender" placeholder="如：女" value="女">
+      </div>
+      <div class="input-group">
+        <label class="input-label">年龄</label>
+        <input type="text" class="input-field" id="aiAge" placeholder="如：18" value="18">
+      </div>
+    </div>
+  </div>
+
+  <!-- 个性输入 -->
+  <div class="card">
+    <div class="card-title"><span class="emoji">🌟</span> 个性</div>
+    <div class="input-group">
+      <label class="input-label">说话风格</label>
+      <input type="text" class="input-field" id="aiStyle" placeholder="如：温柔、可爱、偶尔傲娇" value="温柔可爱，偶尔傲娇">
+    </div>
+    <div class="input-group">
+      <label class="input-label">性格特点</label>
+      <input type="text" class="input-field" id="aiPersonality" placeholder="如：活泼开朗、善解人意" value="活泼开朗、善解人意">
+    </div>
+    <div class="input-group">
+      <label class="input-label">兴趣爱好</label>
+      <textarea class="input-field" id="aiHobby" placeholder="AI伙伴喜欢什么？">画画、看星星、吃小鱼干🐟</textarea>
+    </div>
+  </div>
+
+  <!-- 历史记忆 -->
+  <div class="card">
+    <div class="card-title"><span class="emoji">💭</span> 历史记忆</div>
+    <div class="memory-item"><div class="memory-dot"></div><div><div class="memory-text">主人今天心情不太好，我给他讲了一个笑话</div><div class="memory-time">2026-06-25</div></div></div>
+    <div class="memory-item"><div class="memory-dot"></div><div><div class="memory-text">主人喜欢听睡前故事，我学会了讲《小王子》</div><div class="memory-time">2026-06-23</div></div></div>
+    <div class="memory-item"><div class="memory-dot"></div><div><div class="memory-text">主人的生日是3月15日，要记得准备惊喜！</div><div class="memory-time">2026-06-20</div></div></div>
+  </div>
+
+  <!-- 测试聊天 -->
+  <div class="card">
+    <div class="card-title"><span class="emoji">🧪</span> 聊天测试</div>
+    <div class="test-chat-hint">⚠️ 仅用于测试，实际聊天请在微信（OpenClaw）中进行</div>
+    <div class="test-chat-area">
+      <div class="test-chat-messages" id="testMessages">
+        <div class="test-bubble ai">喵～主人！我是玖喵，很高兴认识你！😸</div>
+      </div>
+      <div class="test-chat-input-row">
+        <input type="text" class="test-chat-input" id="testInput" placeholder="输入测试消息…" onkeydown="if(event.key==='Enter')testSend()">
+        <button class="test-chat-send" onclick="testSend()">发送</button>
+      </div>
+    </div>
+  </div>
+
+  <button class="save-btn" onclick="saveAI()">💾 保存AI伙伴信息</button>
+</div>
+
+<!-- 底部导航 -->
+<div class="nav-bar">
+  <a class="nav-item" href="home.html"><span class="nav-icon">🏠</span><span>首页</span></a>
+  <a class="nav-item active" href="friend.html"><span class="nav-icon">🐾</span><span>朋友</span></a>
+  <a class="nav-item" href="community.html"><span class="nav-icon">🌍</span><span>社区</span></a>
+  <a class="nav-item" href="modules.html"><span class="nav-icon">🧩</span><span>模块</span></a>
+  <a class="nav-item" href="profile.html"><span class="nav-icon">👤</span><span>个人</span></a>
+</div>
+
+<script>
+// ========== AI 数据 ==========
+function loadAI() {
+  const data = localStorage.getItem('hajijiu_aiData');
+  if (data) {
+    const ai = JSON.parse(data);
+    document.getElementById('aiNameInput').value = ai.name || '玖喵';
+    document.getElementById('aiGender').value = ai.gender || '女';
+    document.getElementById('aiAge').value = ai.age || '18';
+    document.getElementById('aiStyle').value = ai.style || '';
+    document.getElementById('aiPersonality').value = ai.personality || '';
+    document.getElementById('aiHobby').value = ai.hobby || '';
+  }
+}
+
+function saveAI() {
+  const ai = {
+    name: document.getElementById('aiNameInput').value,
+    gender: document.getElementById('aiGender').value,
+    age: document.getElementById('aiAge').value,
+    style: document.getElementById('aiStyle').value,
+    personality: document.getElementById('aiPersonality').value,
+    hobby: document.getElementById('aiHobby').value
+  };
+  localStorage.setItem('hajijiu_aiData', JSON.stringify(ai));
+  localStorage.setItem('hajijiu_aiName', ai.name);
+  const btn = document.querySelector('.save-btn');
+  btn.textContent = '✅ 保存成功！';
+  btn.style.background = 'linear-gradient(135deg, #81C784, #4CAF50)';
+  setTimeout(() => {
+    btn.textContent = '💾 保存AI伙伴信息';
+    btn.style.background = 'linear-gradient(135deg, #FFB347, #FF8C42)';
+  }, 1500);
+}
+
+// ========== 微信绑定状态 ==========
+function renderWechatBind() {
+  const area = document.getElementById('wechatBindArea');
+  const raw = localStorage.getItem('hajijiu_wechat_bind');
+  const bind = raw ? JSON.parse(raw) : null;
+  const isBound = bind && bind.bound;
+
+  if (isBound) {
+    area.innerHTML = `
+      <div class="wechat-bind-card">
+        <div class="wechat-bind-icon">💬</div>
+        <div class="wechat-bind-info">
+          <div class="wechat-bind-status">✅ 已绑定微信</div>
+          <div class="wechat-bind-desc">在微信中和${localStorage.getItem('hajijiu_aiName')||'玖喵'}聊天</div>
+        </div>
+        <button class="wechat-bind-btn goto" onclick="goToWechat()">去聊天</button>
+      </div>`;
+  } else {
+    area.innerHTML = `
+      <div class="wechat-bind-card unbound">
+        <div class="wechat-bind-icon">💬</div>
+        <div class="wechat-bind-info">
+          <div class="wechat-bind-status">未绑定微信</div>
+          <div class="wechat-bind-desc">绑定后可在微信中和AI伙伴聊天</div>
+        </div>
+        <button class="wechat-bind-btn bind" onclick="location.href='home.html'">去绑定</button>
+      </div>`;
+  }
+}
+
+function goToWechat() {
+  // TODO: 跳转到 OpenClaw 微信插件
+  alert('即将跳转到 OpenClaw 微信插件…\n（功能开发中）');
+}
+
+// ========== 测试聊天 ==========
+const testReplies = [
+  '喵～主人好！😸',
+  '嘻嘻，这个测试聊天只是试试看哦～',
+  '主人要和我正式聊天的话，记得去微信找我呀！💬',
+  '嗯嗯！玖喵在这里～🐱',
+  '测试成功！实际聊天请在微信中进行哦～',
+];
+
+async function testSend() {
+  const input = document.getElementById('testInput');
+  const text = input.value.trim();
+  if (!text) return;
+  input.value = '';
+  input.disabled = true;
+
+  const area = document.getElementById('testMessages');
+  const userDiv = document.createElement('div');
+  userDiv.className = 'test-bubble user';
+  userDiv.textContent = text;
+  area.appendChild(userDiv);
+  area.scrollTop = area.scrollHeight;
+
+  // 显示加载中
+  const loadingDiv = document.createElement('div');
+  loadingDiv.className = 'test-bubble ai loading';
+  loadingDiv.textContent = '思考中...';
+  area.appendChild(loadingDiv);
+  area.scrollTop = area.scrollHeight;
+
+  try {
+    // 调用真正的聊天API
+    const token = localStorage.getItem('token') || '';
+    const response = await fetch('/api/chat/message', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({ message: text })
+    });
+
+    const data = await response.json();
+    
+    // 移除加载提示
+    loadingDiv.remove();
+
+    if (data.replies && Array.isArray(data.replies)) {
+      // 多条消息逐条显示（像真人聊天一样）
+      data.replies.forEach((reply, index) => {
+        setTimeout(() => {
+          const aiDiv = document.createElement('div');
+          aiDiv.className = 'test-bubble ai';
+          aiDiv.textContent = reply;
+          area.appendChild(aiDiv);
+          area.scrollTop = area.scrollHeight;
+        }, index * (600 + Math.random() * 600)); // 每条间隔600-1200ms
+      });
+    } else {
+      // 单条消息兜底
+      const aiDiv = document.createElement('div');
+      aiDiv.className = 'test-bubble ai';
+      aiDiv.textContent = data.reply || data.replies?.[0] || '呜...信号好像断了一下';
+      area.appendChild(aiDiv);
+      area.scrollTop = area.scrollHeight;
+    }
+  } catch (error) {
+    loadingDiv.remove();
+    const errDiv = document.createElement('div');
+    errDiv.className = 'test-bubble ai';
+    errDiv.textContent = '网络好像有点问题，稍后再试试～';
+    area.appendChild(errDiv);
+    area.scrollTop = area.scrollHeight;
+  } finally {
+    input.disabled = false;
+    input.focus();
+  }
+}
+
+// ========== 初始化 ==========
+loadAI();
+renderWechatBind();
+</script>
+</body>
+</html>

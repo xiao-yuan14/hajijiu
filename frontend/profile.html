@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>个人中心 - 玖喵WeChat</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', sans-serif;
+  background: linear-gradient(180deg, #FFF5E6 0%, #FFECD2 50%, #FFF0DB 100%);
+  min-height: 100vh;
+  padding-bottom: 80px;
+  overflow-x: hidden;
+}
+
+.page-header { text-align: center; padding: 22px 20px 4px; }
+.page-title { font-size: 22px; font-weight: 800; color: #E85D3A; }
+.page-subtitle { font-size: 13px; color: #B8A898; margin-top: 4px; }
+
+.content { padding: 16px; max-width: 420px; margin: 0 auto; }
+
+.card {
+  background: #FFFFFF; border-radius: 18px; padding: 20px;
+  margin-bottom: 14px; box-shadow: 0 3px 14px rgba(232,93,58,0.07);
+}
+.card-title {
+  font-size: 16px; font-weight: 700; color: #5D4E3C;
+  margin-bottom: 14px; display: flex; align-items: center; gap: 6px;
+}
+.card-title .emoji { font-size: 18px; }
+.card-title .badge {
+  margin-left: auto; font-size: 10px; font-weight: 600;
+  color: #FF8C42; background: #FFF3E0; padding: 2px 8px; border-radius: 10px;
+}
+
+/* 个人信息 */
+.profile-section { display: flex; align-items: center; gap: 16px; margin-bottom: 14px; }
+.profile-avatar {
+  width: 64px; height: 64px; border-radius: 50%;
+  background: linear-gradient(135deg, #FFB347, #FF8C42);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 30px; box-shadow: 0 4px 12px rgba(255,140,66,0.3);
+  cursor: pointer; transition: transform 0.2s; flex-shrink: 0;
+}
+.profile-avatar:hover { transform: scale(1.08); }
+.profile-fields { flex: 1; }
+.input-group { margin-bottom: 10px; }
+.input-group:last-child { margin-bottom: 0; }
+.input-label { font-size: 12px; color: #8B7355; font-weight: 600; margin-bottom: 4px; display: block; }
+.input-field {
+  width: 100%; padding: 10px 12px; border: 2px solid #FFE0B2; border-radius: 12px;
+  font-size: 14px; color: #5D4E3C; background: #FFFBF5; outline: none;
+}
+.input-field:focus { border-color: #FFB347; }
+.input-field::placeholder { color: #D4C4B0; }
+.profile-bio { font-size: 18px; font-weight: 700; color: #E85D3A; margin-bottom: 6px; }
+
+/* 登录信息 */
+.login-item {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 0; border-bottom: 1px solid #FFF0E0;
+}
+.login-item:last-child { border-bottom: none; }
+.login-label { font-size: 13px; color: #8B7355; display: flex; align-items: center; gap: 6px; }
+.login-value { font-size: 13px; color: #5D4E3C; font-weight: 600; }
+.login-value.empty { color: #C4B4A0; }
+
+.checkin-btn {
+  width: 100%; padding: 12px;
+  background: linear-gradient(135deg, #FFB347, #FF8C42); color: #FFF;
+  border: none; border-radius: 14px; font-size: 14px; font-weight: 700;
+  cursor: pointer; margin-top: 12px;
+  box-shadow: 0 3px 10px rgba(255,140,66,0.3); transition: transform 0.15s;
+}
+.checkin-btn:hover { transform: scale(1.02); }
+.checkin-btn:disabled { background: #E0D5C8; box-shadow: none; cursor: not-allowed; transform: none; }
+
+/* 积分充值 */
+.recharge-rate { font-size: 18px; font-weight: 800; color: #E85D3A; text-align: center; margin-bottom: 6px; }
+.recharge-note { font-size: 12px; color: #A89880; text-align: center; margin-bottom: 16px; }
+.recharge-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.recharge-btn {
+  padding: 14px 0; background: #FFFBF5; border: 2px solid #FFE0B2;
+  border-radius: 14px; text-align: center; cursor: pointer; transition: all 0.2s;
+}
+.recharge-btn:hover { border-color: #FFB347; background: #FFF5E6; transform: translateY(-1px); }
+.recharge-btn .amount { font-size: 20px; font-weight: 800; color: #E85D3A; }
+.recharge-btn .price { font-size: 12px; color: #A89880; margin-top: 2px; }
+
+/* 聊天次数卡片 */
+.quota-stats { margin-bottom: 14px; }
+.quota-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 0; border-bottom: 1px solid #FFF0E0;
+}
+.quota-row:last-child { border-bottom: none; }
+.quota-label { font-size: 13px; color: #8B7355; }
+.quota-value { font-size: 15px; font-weight: 700; }
+.quota-value.orange { color: #FF8C42; }
+.quota-value.red { color: #E53935; }
+.quota-warn {
+  background: #FFEBEE; color: #E53935; padding: 8px 12px;
+  border-radius: 10px; font-size: 12px; font-weight: 600;
+  text-align: center; margin-bottom: 14px;
+  display: flex; align-items: center; justify-content: center; gap: 4px;
+}
+.quota-buy-main {
+  width: 100%; padding: 14px;
+  background: linear-gradient(135deg, #FFB347, #FF8C42); color: #FFF;
+  border: none; border-radius: 14px; font-size: 16px; font-weight: 800;
+  cursor: pointer; box-shadow: 0 4px 14px rgba(255,140,66,0.35);
+  transition: transform 0.15s; margin-bottom: 10px;
+}
+.quota-buy-main:hover { transform: scale(1.02); }
+.quota-custom {
+  display: flex; gap: 8px; align-items: center;
+}
+.quota-custom-input {
+  flex: 1; padding: 10px 12px; border: 2px solid #FFE0B2;
+  border-radius: 12px; font-size: 13px; color: #5D4E3C;
+  background: #FFFBF5; outline: none; text-align: center;
+}
+.quota-custom-input:focus { border-color: #FFB347; }
+.quota-custom-btn {
+  padding: 10px 18px; background: #FFFBF5; border: 2px solid #FFE0B2;
+  border-radius: 12px; font-size: 13px; font-weight: 600;
+  color: #FF8C42; cursor: pointer; transition: all 0.2s; white-space: nowrap;
+}
+.quota-custom-btn:hover { background: #FFF5E6; border-color: #FFB347; }
+
+/* 待确认订单 */
+.pending-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 0; border-bottom: 1px solid #FFF0E0;
+}
+.pending-item:last-child { border-bottom: none; }
+.pending-type {
+  font-size: 12px; font-weight: 600; padding: 2px 8px;
+  border-radius: 8px; white-space: nowrap;
+}
+.pending-type.points { background: #FFF3E0; color: #FF8C42; }
+.pending-type.quota { background: #E3F2FD; color: #42A5F5; }
+.pending-info { flex: 1; font-size: 13px; color: #5D4E3C; }
+.pending-status { font-size: 12px; color: #FFB347; font-weight: 600; }
+
+/* ========== 支付弹窗 ========== */
+.pay-overlay {
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.5); z-index: 500;
+  display: none; align-items: center; justify-content: center;
+}
+.pay-overlay.show { display: flex; }
+.pay-box {
+  background: #FFF; border-radius: 22px; padding: 24px 20px;
+  width: 92%; max-width: 380px; max-height: 85vh; overflow-y: auto;
+  animation: slideUp 0.3s;
+}
+@keyframes slideUp {
+  from { transform: translateY(30px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+.pay-title { font-size: 18px; font-weight: 700; color: #5D4E3C; text-align: center; margin-bottom: 6px; }
+.pay-amount { font-size: 28px; font-weight: 800; color: #E85D3A; text-align: center; margin-bottom: 14px; }
+
+/* 支付方式 Tab */
+.pay-tabs { display: flex; gap: 0; margin-bottom: 14px; border-radius: 12px; overflow: hidden; border: 2px solid #FFE0B2; }
+.pay-tab {
+  flex: 1; padding: 10px; text-align: center; font-size: 13px;
+  font-weight: 600; cursor: pointer; background: #FFFBF5;
+  color: #8B7355; border: none; transition: all 0.2s;
+}
+.pay-tab.active { background: linear-gradient(135deg, #FFB347, #FF8C42); color: #FFF; }
+
+.pay-qr-area {
+  width: 180px; height: 180px; margin: 0 auto 10px;
+  background: #F5F5F5; border: 2px dashed #E0D5C8; border-radius: 14px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  color: #B8A898; font-size: 13px; gap: 4px;
+}
+.pay-qr-area .icon { font-size: 48px; }
+.pay-note {
+  font-size: 12px; color: #A89880; text-align: center;
+  margin-bottom: 14px; line-height: 1.6;
+}
+.pay-note b { color: #E85D3A; }
+
+/* 上传截图 */
+.upload-area {
+  border: 2px dashed #FFE0B2; border-radius: 14px;
+  padding: 20px; text-align: center; cursor: pointer;
+  transition: all 0.2s; margin-bottom: 14px;
+}
+.upload-area:hover { border-color: #FFB347; background: #FFFBF5; }
+.upload-area .icon { font-size: 32px; margin-bottom: 6px; }
+.upload-area .text { font-size: 13px; color: #8B7355; }
+.upload-preview { max-width: 100%; border-radius: 10px; margin-bottom: 10px; }
+
+.pay-btns { display: flex; gap: 10px; }
+.pay-btn {
+  flex: 1; padding: 12px; border: none; border-radius: 14px;
+  font-size: 14px; font-weight: 600; cursor: pointer; transition: transform 0.15s;
+}
+.pay-btn:hover { transform: scale(1.02); }
+.pay-btn.submit {
+  background: linear-gradient(135deg, #FFB347, #FF8C42); color: #FFF;
+  box-shadow: 0 3px 10px rgba(255,140,66,0.3);
+}
+.pay-btn.cancel { background: #F5F0EB; color: #8B7355; }
+.pay-btn:disabled { background: #E0D5C8; color: #9E9E9E; cursor: not-allowed; transform: none; }
+
+/* 底部导航 */
+.nav-bar {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  background: #FFFFFF; display: flex; justify-content: space-around;
+  padding: 8px 0 12px; box-shadow: 0 -2px 12px rgba(0,0,0,0.06);
+  border-radius: 18px 18px 0 0; z-index: 100;
+}
+.nav-item {
+  display: flex; flex-direction: column; align-items: center;
+  text-decoration: none; color: #B8A898; font-size: 11px;
+  gap: 2px; padding: 2px 10px; border-radius: 12px; transition: all 0.2s;
+}
+.nav-item .nav-icon { font-size: 22px; }
+.nav-item.active { color: #E85D3A; background: rgba(232,93,58,0.08); font-weight: 600; }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <div class="page-title">👤 个人中心</div>
+  <div class="page-subtitle">你，指的是用户</div>
+</div>
+
+<div class="content">
+  <!-- 个人信息 -->
+  <div class="card">
+    <div class="card-title"><span class="emoji">✏️</span> 个人信息</div>
+    <div class="profile-section">
+      <div class="profile-avatar" onclick="changeAvatar()">🐱</div>
+      <div class="profile-fields">
+        <div class="input-group">
+          <label class="input-label">设置名称</label>
+          <input type="text" class="input-field" id="userName" value="小源同学" oninput="saveProfile()">
+        </div>
+      </div>
+    </div>
+    <div class="profile-bio" id="userBio">小源同学</div>
+    <div class="input-group">
+      <label class="input-label">简介</label>
+      <input type="text" class="input-field" id="userBioInput" placeholder="写一句话介绍自己" value="热爱生活，喜欢和AI聊天" oninput="saveProfile()">
+    </div>
+  </div>
+
+  <!-- 登录信息 -->
+  <div class="card">
+    <div class="card-title"><span class="emoji">🔐</span> 登录信息</div>
+    <div class="login-item">
+      <span class="login-label">📧 绑定邮箱</span>
+      <span class="login-value empty" id="emailDisplay">未绑定</span>
+    </div>
+    <div class="login-item">
+      <span class="login-label">💬 绑定微信</span>
+      <span class="login-value" id="wechatDisplay">已绑定</span>
+    </div>
+    <button class="checkin-btn" id="checkinBtn" onclick="dailyCheckin()">🎁 每日签到领1积分</button>
+  </div>
+
+  <!-- 积分充值 -->
+  <div class="card">
+    <!-- 玖喵抱爱心装饰 -->
+    <div style="text-align:center;margin-bottom:10px;">
+      <svg viewBox="0 0 80 80" width="36" height="36">
+        <polygon points="16,38 13,20 28,34" fill="#FFE5D9" stroke="#E85D3A" stroke-width="1.5" stroke-linejoin="round"/>
+        <polygon points="64,38 67,20 52,34" fill="#FFE5D9" stroke="#E85D3A" stroke-width="1.5" stroke-linejoin="round"/>
+        <ellipse cx="40" cy="48" rx="22" ry="20" fill="#FFE5D9" stroke="#E85D3A" stroke-width="1.5"/>
+        <ellipse cx="34" cy="46" rx="2.5" ry="3" fill="#333"/><circle cx="35" cy="44.5" r="0.8" fill="#FFF"/>
+        <ellipse cx="46" cy="46" rx="2.5" ry="3" fill="#333"/><circle cx="47" cy="44.5" r="0.8" fill="#FFF"/>
+        <ellipse cx="28" cy="52" rx="4" ry="2.5" fill="#FFB6C1" opacity="0.4"/>
+        <ellipse cx="52" cy="52" rx="4" ry="2.5" fill="#FFB6C1" opacity="0.4"/>
+        <path d="M 37 55 Q 40 58 43 55" fill="none" stroke="#E85D3A" stroke-width="1" stroke-linecap="round"/>
+        <!-- 爱心 -->
+        <path d="M 40 60 C 40 56 32 52 32 56 C 32 60 40 66 40 66 C 40 66 48 60 48 56 C 48 52 40 56 40 60 Z" fill="#FF6B8A" opacity="0.8"/>
+      </svg>
+    </div>
+    <div class="card-title"><span class="emoji">💰</span> 积分充值</div>
+    <div class="recharge-rate">1 块钱 = 5 积分</div>
+    <div class="recharge-note">积分是提升AI伙伴技能的重要货币</div>
+    <div class="recharge-grid">
+      <div class="recharge-btn" onclick="openPay('points', 1, 5)">
+        <div class="amount">5 积分</div><div class="price">¥ 1.00</div>
+      </div>
+      <div class="recharge-btn" onclick="openPay('points', 2, 10)">
+        <div class="amount">10 积分</div><div class="price">¥ 2.00</div>
+      </div>
+      <div class="recharge-btn" onclick="openPay('points', 6, 30)">
+        <div class="amount">30 积分</div><div class="price">¥ 6.00</div>
+      </div>
+      <div class="recharge-btn" onclick="openPay('points', 10, 50)">
+        <div class="amount">50 积分</div><div class="price">¥ 10.00</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 聊天次数 -->
+  <div class="card">
+    <div class="card-title"><span class="emoji">💬</span> 聊天次数</div>
+    <div style="font-size:13px;color:#8B7355;margin-bottom:12px;">每周免费聊天200条，用完可购买额外次数</div>
+
+    <div class="quota-stats">
+      <div class="quota-row">
+        <span class="quota-label">本周剩余免费次数</span>
+        <span class="quota-value orange" id="freeQuota">156</span>
+      </div>
+      <div class="quota-row">
+        <span class="quota-label">已购买额外次数</span>
+        <span class="quota-value orange" id="paidQuota">0</span>
+      </div>
+    </div>
+
+    <div class="quota-warn" id="quotaWarn" style="display:none;">
+      ⚠️ 次数不足，请及时充值
+    </div>
+
+    <button class="quota-buy-main" onclick="openPay('quota', 1, 288)">💰 1元购买288条</button>
+
+    <div class="quota-custom">
+      <input type="number" class="quota-custom-input" id="customQuota" placeholder="自定义数量（288的倍数）" min="288" step="288">
+      <button class="quota-custom-btn" onclick="buyCustomQuota()">购买</button>
+    </div>
+  </div>
+
+  <!-- 待确认订单 -->
+  <div class="card">
+    <div class="card-title">
+      <span class="emoji">📋</span> 订单记录
+      <span class="badge" id="pendingBadge" style="display:none;"></span>
+    </div>
+    <div id="orderList">
+      <div style="text-align:center;color:#C4B4A0;font-size:13px;padding:10px 0;">暂无订单记录</div>
+    </div>
+  </div>
+</div>
+
+<!-- 支付弹窗 -->
+<div class="pay-overlay" id="payOverlay">
+  <div class="pay-box">
+    <div class="pay-title">扫码支付</div>
+    <div class="pay-amount" id="payAmountDisplay"></div>
+
+    <div class="pay-tabs">
+      <button class="pay-tab active" id="tabAlipay" onclick="switchPayTab('alipay')">支付宝</button>
+      <button class="pay-tab" id="tabWechat" onclick="switchPayTab('wechat')">微信</button>
+    </div>
+
+    <div class="pay-qr-area" id="payQR">
+      <div class="icon">📱</div>
+      <div>收款码加载中…</div>
+    </div>
+
+    <div class="pay-note" id="payNote">请备注您的用户名：<b id="payUsername">小源同学</b></div>
+
+    <div class="upload-area" id="uploadArea" onclick="document.getElementById('screenshotInput').click()">
+      <div class="icon">📷</div>
+      <div class="text">点击上传支付截图</div>
+    </div>
+    <input type="file" id="screenshotInput" accept="image/*" style="display:none;" onchange="handleScreenshot(event)">
+
+    <div class="pay-btns">
+      <button class="pay-btn cancel" onclick="closePay()">取消</button>
+      <button class="pay-btn submit" id="paySubmitBtn" onclick="submitPay()" disabled>提交支付凭证</button>
+    </div>
+  </div>
+</div>
+
+<!-- 底部导航 -->
+<div class="nav-bar">
+  <a class="nav-item" href="home.html"><span class="nav-icon">🏠</span><span>首页</span></a>
+  <a class="nav-item" href="friend.html"><span class="nav-icon">🐾</span><span>朋友</span></a>
+  <a class="nav-item" href="community.html"><span class="nav-icon">🌍</span><span>社区</span></a>
+  <a class="nav-item" href="modules.html"><span class="nav-icon">🧩</span><span>模块</span></a>
+  <a class="nav-item active" href="profile.html"><span class="nav-icon">👤</span><span>个人</span></a>
+</div>
+
+<script>
+const POINTS_KEY = 'hajijiu_points';
+const CHECKIN_KEY = 'hajijiu_last_checkin';
+const PROFILE_KEY = 'hajijiu_userProfile';
+const QUOTA_KEY = 'hajijiu_chat_quota';
+const ORDERS_KEY = 'hajijiu_orders';
+
+// ========== 工具 ==========
+function getPoints() { return parseInt(localStorage.getItem(POINTS_KEY) || '100'); }
+function setPoints(v) { localStorage.setItem(POINTS_KEY, String(v)); }
+function getQuota() {
+  const raw = localStorage.getItem(QUOTA_KEY);
+  if (raw) return JSON.parse(raw);
+  return { free: 200, paid: 0, weekStart: getWeekStart() };
+}
+function setQuota(q) { localStorage.setItem(QUOTA_KEY, JSON.stringify(q)); }
+function getWeekStart() {
+  const d = new Date();
+  const day = d.getDay() || 7;
+  d.setDate(d.getDate() - day + 1);
+  return d.toISOString().slice(0, 10);
+}
+function getOrders() { return JSON.parse(localStorage.getItem(ORDERS_KEY) || '[]'); }
+function setOrders(o) { localStorage.setItem(ORDERS_KEY, JSON.stringify(o)); }
+
+// ========== 个人信息 ==========
+function saveProfile() {
+  const name = document.getElementById('userName').value.trim();
+  const bio = document.getElementById('userBioInput').value.trim();
+  document.getElementById('userBio').textContent = name;
+  localStorage.setItem('hajijiu_userName', name || '小源同学');
+  localStorage.setItem(PROFILE_KEY, JSON.stringify({ name, bio }));
+}
+function loadProfile() {
+  const raw = localStorage.getItem(PROFILE_KEY);
+  if (raw) {
+    const p = JSON.parse(raw);
+    document.getElementById('userName').value = p.name || '小源同学';
+    document.getElementById('userBioInput').value = p.bio || '';
+    document.getElementById('userBio').textContent = p.name || '小源同学';
+  }
+}
+function changeAvatar() {
+  const avatars = ['🐱','🐶','🐰','🦊','🐻','🐼','🐨','🦁','🐯','🐸'];
+  const el = document.querySelector('.profile-avatar');
+  const idx = avatars.indexOf(el.textContent);
+  el.textContent = avatars[(idx + 1) % avatars.length];
+}
+
+// ========== 签到 ==========
+function dailyCheckin() {
+  const today = new Date().toISOString().slice(0, 10);
+  if (localStorage.getItem(CHECKIN_KEY) === today) { alert('今天已经签到过了哦～'); return; }
+  localStorage.setItem(CHECKIN_KEY, today);
+  setPoints(getPoints() + 1);
+  const btn = document.getElementById('checkinBtn');
+  btn.textContent = '✅ 今日已签到'; btn.disabled = true;
+  alert('签到成功！获得 1 积分 🎉');
+}
+
+// ========== 聊天次数 ==========
+function refreshQuota() {
+  let q = getQuota();
+  // 检查是否需要重置周
+  if (q.weekStart !== getWeekStart()) {
+    q = { free: 200, paid: 0, weekStart: getWeekStart() };
+    setQuota(q);
+  }
+  document.getElementById('freeQuota').textContent = q.free + ' 条';
+  document.getElementById('paidQuota').textContent = q.paid + ' 条';
+
+  const total = q.free + q.paid;
+  const warn = document.getElementById('quotaWarn');
+  if (total < 50) { warn.style.display = 'flex'; }
+  else { warn.style.display = 'none'; }
+
+  // 更新免费次数颜色
+  const freeEl = document.getElementById('freeQuota');
+  freeEl.className = 'quota-value ' + (q.free < 30 ? 'red' : 'orange');
+}
+
+function buyCustomQuota() {
+  const val = parseInt(document.getElementById('customQuota').value);
+  if (!val || val < 288 || val % 288 !== 0) {
+    alert('请输入288的倍数（如288、576、864）'); return;
+  }
+  const yuan = val / 288;
+  openPay('quota', yuan, val);
+}
+
+// ========== 支付弹窗 ==========
+let currentPayOrder = null;
+
+function openPay(type, yuan, amount) {
+  currentPayOrder = { type, yuan, amount };
+  document.getElementById('payAmountDisplay').textContent = '¥ ' + yuan.toFixed(2);
+  document.getElementById('payUsername').textContent = localStorage.getItem('hajijiu_userName') || '小源同学';
+  document.getElementById('paySubmitBtn').disabled = true;
+
+  // 重置上传
+  document.getElementById('uploadArea').innerHTML = '<div class="icon">📷</div><div class="text">点击上传支付截图</div>';
+  document.getElementById('screenshotInput').value = '';
+
+  // 加载收款码（模拟）
+  loadPayQR('alipay');
+  switchPayTab('alipay');
+
+  document.getElementById('payOverlay').classList.add('show');
+}
+
+function closePay() {
+  document.getElementById('payOverlay').classList.remove('show');
+  currentPayOrder = null;
+}
+
+function switchPayTab(tab) {
+  document.getElementById('tabAlipay').className = 'pay-tab' + (tab === 'alipay' ? ' active' : '');
+  document.getElementById('tabWechat').className = 'pay-tab' + (tab === 'wechat' ? ' active' : '');
+  loadPayQR(tab);
+}
+
+function loadPayQR(tab) {
+  // TODO: 上线后从后端获取管理员设置的收款码
+  // GET /api/admin/pay-qr?type=alipay|wechat
+  const qr = document.getElementById('payQR');
+  const label = tab === 'alipay' ? '支付宝' : '微信';
+  qr.innerHTML = `<div class="icon">${tab === 'alipay' ? '💳' : '💬'}</div><div>${label}收款码</div><div style="font-size:10px;color:#C4B4A0;">（管理员后台配置后显示）</div>`;
+}
+
+function handleScreenshot(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(ev) {
+    const area = document.getElementById('uploadArea');
+    area.innerHTML = `<img src="${ev.target.result}" class="upload-preview" style="max-height:120px;"><div class="text" style="color:#4CAF50;">✅ 已上传截图</div>`;
+    document.getElementById('paySubmitBtn').disabled = false;
+  };
+  reader.readAsDataURL(file);
+}
+
+function submitPay() {
+  if (!currentPayOrder) return;
+  const userName = localStorage.getItem('hajijiu_userName') || '小源同学';
+  const now = new Date();
+  const timeStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+
+  const order = {
+    id: 'ORD_' + Date.now(),
+    userName,
+    type: currentPayOrder.type,
+    amount: currentPayOrder.amount,
+    yuan: currentPayOrder.yuan,
+    status: 'pending',
+    time: timeStr
+  };
+
+  const orders = getOrders();
+  orders.unshift(order);
+  setOrders(orders);
+
+  closePay();
+  renderOrders();
+  alert('支付凭证已提交，等待管理员确认 ✅');
+}
+
+// ========== 订单列表 ==========
+function renderOrders() {
+  const orders = getOrders();
+  const list = document.getElementById('orderList');
+  const badge = document.getElementById('pendingBadge');
+
+  const pending = orders.filter(o => o.status === 'pending');
+  if (pending.length > 0) {
+    badge.style.display = 'inline-block';
+    badge.textContent = pending.length + ' 待确认';
+  } else {
+    badge.style.display = 'none';
+  }
+
+  if (orders.length === 0) {
+    list.innerHTML = '<div style="text-align:center;color:#C4B4A0;font-size:13px;padding:10px 0;">暂无订单记录</div>';
+    return;
+  }
+
+  list.innerHTML = orders.slice(0, 10).map(o => `
+    <div class="pending-item">
+      <span class="pending-type ${o.type}">${o.type === 'points' ? '积分' : '聊天次数'}</span>
+      <span class="pending-info">${o.type === 'points' ? o.amount + '积分' : o.amount + '条'} / ¥${o.yuan.toFixed(2)}</span>
+      <span class="pending-status" style="color:${o.status === 'pending' ? '#FFB347' : o.status === 'confirmed' ? '#4CAF50' : '#E53935'};">
+        ${o.status === 'pending' ? '⏳ 待确认' : o.status === 'confirmed' ? '✅ 已确认' : '❌ 已拒绝'}
+      </span>
+    </div>
+  `).join('');
+}
+
+// ========== 初始化 ==========
+loadProfile();
+refreshQuota();
+renderOrders();
+
+const today = new Date().toISOString().slice(0, 10);
+if (localStorage.getItem(CHECKIN_KEY) === today) {
+  const btn = document.getElementById('checkinBtn');
+  btn.textContent = '✅ 今日已签到'; btn.disabled = true;
+}
+
+const wcBind = localStorage.getItem('hajijiu_wechat_bind');
+if (wcBind) {
+  const d = JSON.parse(wcBind);
+  document.getElementById('wechatDisplay').textContent = d.bound ? '已绑定' : '未绑定';
+  document.getElementById('wechatDisplay').className = 'login-value' + (d.bound ? '' : ' empty');
+}
+
+// 点击遮罩关闭支付弹窗
+document.getElementById('payOverlay').addEventListener('click', function(e) {
+  if (e.target === this) closePay();
+});
+</script>
+</body>
+</html>
