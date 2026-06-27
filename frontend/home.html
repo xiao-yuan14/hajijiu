@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>首页 - 玖喵WeChat</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', sans-serif;
+  background: linear-gradient(180deg, #FFF5E6 0%, #FFECD2 50%, #FFF0DB 100%);
+  min-height: 100vh;
+  padding-bottom: 80px;
+  overflow-x: hidden;
+}
+
+/* 顶部AI伙伴区域 */
+.ai-header {
+  background: linear-gradient(135deg, #FFE0B2, #FFCC80);
+  padding: 24px 20px 28px;
+  border-radius: 0 0 28px 28px;
+  box-shadow: 0 4px 16px rgba(232,93,58,0.1);
+}
+.ai-info { display: flex; align-items: center; justify-content: space-between; }
+.ai-left { flex: 1; }
+.ai-name { font-size: 26px; font-weight: 800; color: #E85D3A; margin-bottom: 4px; }
+.ai-tag {
+  display: inline-block; background: rgba(255,255,255,0.7);
+  padding: 3px 12px; border-radius: 20px; font-size: 12px; color: #8B7355;
+  margin-right: 6px; margin-top: 4px;
+}
+.ai-cat {
+  font-size: 64px; line-height: 1;
+  filter: drop-shadow(2px 4px 6px rgba(0,0,0,0.1));
+  animation: catBounce 3s ease-in-out infinite;
+}
+@keyframes catBounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+.content { padding: 18px 16px; max-width: 420px; margin: 0 auto; }
+
+.card {
+  background: #FFFFFF; border-radius: 18px; padding: 20px;
+  margin-bottom: 14px; box-shadow: 0 3px 14px rgba(232,93,58,0.07);
+}
+.card-title {
+  font-size: 16px; font-weight: 700; color: #5D4E3C;
+  margin-bottom: 14px; display: flex; align-items: center; gap: 6px;
+}
+.card-title .emoji { font-size: 18px; }
+
+/* 微信聊天引导卡 - 最显眼 */
+.wechat-hero {
+  background: linear-gradient(135deg, #07C160, #06AD56);
+  border-radius: 18px; padding: 22px 20px;
+  margin-bottom: 14px; color: #FFF;
+  box-shadow: 0 6px 20px rgba(7,193,96,0.3);
+  position: relative; overflow: hidden;
+}
+.wechat-hero::before {
+  content: ''; position: absolute; top: -30px; right: -30px;
+  width: 120px; height: 120px;
+  background: radial-gradient(circle, rgba(255,255,255,0.15), transparent);
+  border-radius: 50%;
+}
+.wechat-hero-title {
+  font-size: 18px; font-weight: 800; margin-bottom: 6px;
+  display: flex; align-items: center; gap: 8px;
+}
+.wechat-hero-desc { font-size: 13px; opacity: 0.9; margin-bottom: 14px; line-height: 1.5; }
+.wechat-hero-stats {
+  display: flex; gap: 16px; margin-bottom: 14px;
+}
+.wechat-stat {
+  background: rgba(255,255,255,0.2); border-radius: 12px;
+  padding: 8px 14px; font-size: 12px;
+}
+.wechat-stat-value { font-size: 18px; font-weight: 800; }
+.wechat-stat-label { opacity: 0.8; font-size: 11px; }
+.wechat-hero-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 12px 28px; background: #FFF; color: #07C160;
+  border: none; border-radius: 20px; font-size: 15px;
+  font-weight: 700; cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.15);
+  position: relative; z-index: 1;
+}
+.wechat-hero-btn:hover { transform: scale(1.05); }
+.wechat-hero-btn.unbind {
+  background: rgba(255,255,255,0.25); color: #FFF;
+  box-shadow: none;
+}
+.wechat-quota-warn {
+  background: #FFEBEE; color: #E53935; padding: 4px 10px;
+  border-radius: 8px; font-size: 11px; font-weight: 600;
+  display: inline-flex; align-items: center; gap: 4px;
+  margin-top: 8px;
+}
+
+/* 未绑定状态 */
+.wechat-unbind-card {
+  background: #FFFFFF; border-radius: 18px; padding: 20px;
+  margin-bottom: 14px; box-shadow: 0 3px 14px rgba(232,93,58,0.07);
+  border: 2px dashed #FFCC80; text-align: center;
+}
+.wechat-unbind-card .icon { font-size: 40px; margin-bottom: 8px; }
+.wechat-unbind-card .title { font-size: 16px; font-weight: 700; color: #5D4E3C; margin-bottom: 6px; }
+.wechat-unbind-card .desc { font-size: 13px; color: #8B7355; margin-bottom: 14px; line-height: 1.5; }
+.wechat-bind-btn {
+  padding: 12px 32px; background: linear-gradient(135deg, #07C160, #06AD56);
+  color: #FFF; border: none; border-radius: 20px; font-size: 14px;
+  font-weight: 700; cursor: pointer;
+  box-shadow: 0 4px 14px rgba(7,193,96,0.3); transition: transform 0.15s;
+}
+.wechat-bind-btn:hover { transform: scale(1.05); }
+
+/* 模块列表 */
+.module-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 0; border-bottom: 1px solid #FFF0E0;
+}
+.module-item:last-child { border-bottom: none; }
+.module-icon {
+  width: 42px; height: 42px; border-radius: 12px;
+  background: linear-gradient(135deg, #FFE0B2, #FFCC80);
+  display: flex; align-items: center; justify-content: center; font-size: 20px;
+}
+.module-info { flex: 1; }
+.module-name { font-size: 14px; font-weight: 600; color: #5D4E3C; }
+.module-desc { font-size: 12px; color: #A89880; margin-top: 2px; }
+.module-use-btn {
+  padding: 6px 14px; background: linear-gradient(135deg, #FFB347, #FF8C42);
+  color: #FFF; border: none; border-radius: 14px;
+  font-size: 12px; font-weight: 600; cursor: pointer;
+  transition: transform 0.15s; white-space: nowrap;
+  box-shadow: 0 2px 8px rgba(255,140,66,0.25);
+}
+.module-use-btn:hover { transform: scale(1.05); }
+
+/* 弹窗通用 */
+.modal-overlay {
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.45); z-index: 200;
+  display: none; align-items: center; justify-content: center;
+}
+.modal-overlay.show { display: flex; }
+@keyframes slideUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+.modal-box {
+  background: #FFF; border-radius: 22px; padding: 24px 20px;
+  width: 90%; max-width: 360px;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.15); animation: slideUp 0.3s;
+}
+.modal-title { font-size: 18px; font-weight: 700; color: #5D4E3C; margin-bottom: 12px; }
+.modal-desc { font-size: 13px; color: #8B7355; line-height: 1.6; margin-bottom: 16px; }
+
+/* 模块执行弹窗 */
+.module-modal .param-group { margin-bottom: 12px; }
+.module-modal .param-label { font-size: 12px; color: #8B7355; font-weight: 600; margin-bottom: 4px; display: block; }
+.module-modal .param-input {
+  width: 100%; padding: 10px 12px; border: 2px solid #FFE0B2;
+  border-radius: 12px; font-size: 13px; color: #5D4E3C;
+  background: #FFFBF5; outline: none;
+}
+.module-modal .param-input:focus { border-color: #FFB347; }
+.module-modal .param-input::placeholder { color: #D4C4B0; }
+.module-modal .result-area {
+  background: #FFFBF5; border-radius: 12px; padding: 14px;
+  margin-top: 12px; font-size: 13px; color: #8B7355; line-height: 1.6;
+  min-height: 60px; border: 1px solid #FFE0B2;
+}
+.modal-btns { display: flex; gap: 10px; margin-top: 16px; }
+.modal-btn {
+  flex: 1; padding: 12px; border: none; border-radius: 14px;
+  font-size: 14px; font-weight: 600; cursor: pointer; transition: transform 0.15s;
+}
+.modal-btn:hover { transform: scale(1.02); }
+.modal-btn.primary {
+  background: linear-gradient(135deg, #FFB347, #FF8C42); color: #FFF;
+  box-shadow: 0 3px 10px rgba(255,140,66,0.3);
+}
+.modal-btn.secondary { background: #F5F0EB; color: #8B7355; }
+.modal-btn.primary:disabled { background: #E0D5C8; box-shadow: none; cursor: not-allowed; transform: none; }
+
+/* 微信绑定弹窗 */
+.bind-modal .modal-qr {
+  width: 140px; height: 140px; margin: 0 auto 14px;
+  background: #F5F5F5; border: 2px dashed #E0D5C8; border-radius: 12px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  color: #B8A898; font-size: 12px; gap: 4px;
+}
+.bind-modal .modal-qr .icon { font-size: 36px; }
+.bind-modal .modal-steps {
+  text-align: left; font-size: 12px; color: #8B7355;
+  line-height: 2; margin-bottom: 14px; padding-left: 20px;
+}
+
+/* 底部导航 */
+.nav-bar {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  background: #FFFFFF; display: flex; justify-content: space-around;
+  padding: 8px 0 12px; box-shadow: 0 -2px 12px rgba(0,0,0,0.06);
+  border-radius: 18px 18px 0 0; z-index: 100;
+}
+.nav-item {
+  display: flex; flex-direction: column; align-items: center;
+  text-decoration: none; color: #B8A898; font-size: 11px;
+  gap: 2px; padding: 2px 10px; border-radius: 12px; transition: all 0.2s;
+}
+.nav-item .nav-icon { font-size: 22px; }
+.nav-item.active { color: #E85D3A; background: rgba(232,93,58,0.08); font-weight: 600; }
+</style>
+</head>
+<body>
+
+<div class="ai-header">
+  <div class="ai-info">
+    <div class="ai-left">
+      <div class="ai-name" id="aiName">玖喵</div>
+      <div>
+        <span class="ai-tag">🐱 猫娘</span>
+        <span class="ai-tag">💬 聊天</span>
+        <span class="ai-tag">🎨 绘画</span>
+      </div>
+    </div>
+    <div class="ai-cat">😺</div>
+  </div>
+</div>
+
+<div class="content">
+  <!-- 微信聊天引导 - 最显眼 -->
+  <div id="wechatHeroArea"></div>
+
+  <!-- 模块仓库 -->
+  <div class="card">
+    <div class="card-title"><span class="emoji">📦</span> 模块仓库</div>
+    <div class="module-item">
+      <div class="module-icon">💬</div>
+      <div class="module-info"><div class="module-name">聊天增强模块</div><div class="module-desc">让对话更自然流畅</div></div>
+      <button class="module-use-btn" onclick="useModule('chat_enhance','聊天增强模块')">使用</button>
+    </div>
+    <div class="module-item">
+      <div class="module-icon">🎨</div>
+      <div class="module-info"><div class="module-name">绘画模块</div><div class="module-desc">AI创作精美图片</div></div>
+      <button class="module-use-btn" onclick="useModule('drawing','绘画模块')">使用</button>
+    </div>
+    <div class="module-item">
+      <div class="module-icon">🎤</div>
+      <div class="module-info"><div class="module-name">语音模块</div><div class="module-desc">语音对话更亲切</div></div>
+      <button class="module-use-btn" onclick="useModule('voice','语音模块')">使用</button>
+    </div>
+  </div>
+</div>
+
+<!-- 模块执行弹窗 -->
+<div class="modal-overlay" id="moduleModal">
+  <div class="modal-box module-modal">
+    <div class="modal-title" id="mmTitle"></div>
+    <div class="modal-desc" id="mmDesc"></div>
+    <div id="mmParams"></div>
+    <div class="result-area" id="mmResult" style="display:none;"></div>
+    <div class="modal-btns">
+      <button class="modal-btn secondary" onclick="closeModuleModal()">取消</button>
+      <button class="modal-btn primary" id="mmExecBtn" onclick="executeModule()">执行</button>
+    </div>
+  </div>
+</div>
+
+<!-- 绑定微信弹窗 -->
+<div class="modal-overlay" id="bindModal">
+  <div class="modal-box bind-modal">
+    <div class="modal-title">🔗 绑定微信</div>
+    <div class="modal-desc">通过 OpenClaw 微信插件，将 AI 伙伴接入你的微信</div>
+    <div class="modal-qr"><div class="icon">📱</div><div>扫码绑定 OpenClaw</div></div>
+    <div class="modal-steps">
+      1️⃣ 打开 OpenClaw，进入「微信插件」<br>
+      2️⃣ 扫描上方二维码，登录微信<br>
+      3️⃣ 选择 AI 伙伴「<span id="modalAIName">玖喵</span>」<br>
+      4️⃣ 绑定成功后，即可在微信中聊天
+    </div>
+    <div class="modal-btns">
+      <button class="modal-btn primary" onclick="closeBindModal()" style="flex:1;">我知道了</button>
+    </div>
+  </div>
+</div>
+
+<!-- 底部导航 -->
+<div class="nav-bar">
+  <a class="nav-item active" href="home.html"><span class="nav-icon">🏠</span><span>首页</span></a>
+  <a class="nav-item" href="friend.html"><span class="nav-icon">🐾</span><span>朋友</span></a>
+  <a class="nav-item" href="community.html"><span class="nav-icon">🌍</span><span>社区</span></a>
+  <a class="nav-item" href="modules.html"><span class="nav-icon">🧩</span><span>模块</span></a>
+  <a class="nav-item" href="profile.html"><span class="nav-icon">👤</span><span>个人</span></a>
+</div>
+
+<script>
+// ========== 微信连接 & 聊天引导 ==========
+const WC_KEY = 'hajijiu_wechat_bind';
+const QUOTA_KEY = 'hajijiu_chat_quota';
+function getWechatBind() { const r = localStorage.getItem(WC_KEY); return r ? JSON.parse(r) : null; }
+function saveWechatBind(d) { localStorage.setItem(WC_KEY, JSON.stringify(d)); }
+
+function getWeekStart() {
+  const d = new Date(); const day = d.getDay() || 7;
+  d.setDate(d.getDate() - day + 1); return d.toISOString().slice(0, 10);
+}
+function getQuota() {
+  const raw = localStorage.getItem(QUOTA_KEY);
+  if (raw) { const q = JSON.parse(raw); if (q.weekStart === getWeekStart()) return q; }
+  return { free: 200, paid: 0, weekStart: getWeekStart() };
+}
+
+function renderWechatHero() {
+  const area = document.getElementById('wechatHeroArea');
+  const bind = getWechatBind();
+  const isBound = bind && bind.bound;
+  const quota = getQuota();
+  const total = quota.free + quota.paid;
+  const aiName = localStorage.getItem('hajijiu_aiName') || '玖喵';
+
+  if (isBound) {
+    area.innerHTML = `
+      <div class="wechat-hero">
+        <div class="wechat-hero-title">💬 在微信中和${aiName}聊天</div>
+        <div class="wechat-hero-desc">通过 OpenClaw 微信插件，随时随地和 AI 伙伴对话</div>
+        <div class="wechat-hero-stats">
+          <div class="wechat-stat">
+            <div class="wechat-stat-value">${quota.free}</div>
+            <div class="wechat-stat-label">免费剩余</div>
+          </div>
+          <div class="wechat-stat">
+            <div class="wechat-stat-value">${quota.paid}</div>
+            <div class="wechat-stat-label">已购买</div>
+          </div>
+        </div>
+        ${total < 50 ? '<div class="wechat-quota-warn">⚠️ 次数不足，<a href="profile.html" style="color:#E53935;text-decoration:underline;">去购买</a></div>' : ''}
+        <button class="wechat-hero-btn" onclick="goToWechat()">💬 去微信聊天</button>
+      </div>`;
+  } else {
+    area.innerHTML = `
+      <div class="wechat-unbind-card">
+        <div class="icon">💬</div>
+        <div class="title">绑定微信，开始聊天</div>
+        <div class="desc">通过 OpenClaw 微信插件连接 AI 伙伴<br>在微信中随时随地和${aiName}对话</div>
+        <button class="wechat-bind-btn" onclick="openBindModal()">🔗 绑定微信</button>
+      </div>`;
+  }
+}
+
+function openBindModal() {
+  document.getElementById('modalAIName').textContent = localStorage.getItem('hajijiu_aiName') || '玖喵';
+  document.getElementById('bindModal').classList.add('show');
+}
+function closeBindModal() {
+  document.getElementById('bindModal').classList.remove('show');
+  const now = new Date();
+  const ts = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+  saveWechatBind({ bound: true, nickname: '小源同学_微信', bindTime: ts });
+  renderWechatHero();
+}
+function goToWechat() {
+  alert('即将跳转到 OpenClaw 微信插件…\n（功能开发中）');
+}
+
+// ========== 模块功能 ==========
+const MODULE_CONFIG = {
+  chat_enhance: { name: '聊天增强模块', model: 'DeepSeek-Chat', desc: '增强AI伙伴的聊天能力', params: [{ key: 'prompt', label: '增强提示词', placeholder: '如：更傲娇一点 / 更温柔一点', type: 'text' }] },
+  drawing: { name: '绘画模块', model: 'DALL-E 3', desc: '让AI伙伴为你创作精美图片', params: [{ key: 'prompt', label: '画面描述', placeholder: '描述你想要的画面', type: 'text' }] },
+  voice: { name: '语音模块', model: 'TTS-v3', desc: '将文字转换为可爱的语音消息', params: [{ key: 'text', label: '要转换的文字', placeholder: '输入想让AI说的文字', type: 'text' }, { key: 'tone', label: '语气风格', placeholder: '如：温柔 / 活泼 / 傲娇', type: 'text' }] }
+};
+let currentModuleId = null;
+
+function useModule(moduleId) {
+  currentModuleId = moduleId;
+  const config = MODULE_CONFIG[moduleId];
+  document.getElementById('mmTitle').textContent = '🧩 ' + config.name;
+  document.getElementById('mmDesc').textContent = config.desc + '（模型：' + config.model + '）';
+  document.getElementById('mmResult').style.display = 'none';
+  document.getElementById('mmResult').textContent = '';
+  document.getElementById('mmExecBtn').disabled = false;
+  document.getElementById('mmExecBtn').textContent = '执行';
+  document.getElementById('mmParams').innerHTML = config.params.map(p =>
+    `<div class="param-group"><label class="param-label">${p.label}</label><input type="text" class="param-input" id="param_${p.key}" placeholder="${p.placeholder}"></div>`
+  ).join('');
+  document.getElementById('moduleModal').classList.add('show');
+}
+
+function closeModuleModal() {
+  document.getElementById('moduleModal').classList.remove('show');
+  currentModuleId = null;
+}
+
+async function executeModule() {
+  if (!currentModuleId) return;
+  const config = MODULE_CONFIG[currentModuleId];
+  const params = {};
+  config.params.forEach(p => { params[p.key] = document.getElementById('param_' + p.key).value.trim(); });
+  const execBtn = document.getElementById('mmExecBtn');
+  execBtn.disabled = true; execBtn.textContent = '执行中…';
+  await new Promise(r => setTimeout(r, 1500 + Math.random() * 1000));
+  const resultArea = document.getElementById('mmResult');
+  resultArea.style.display = 'block';
+  if (currentModuleId === 'drawing') {
+    resultArea.innerHTML = `🎨 绘画模块执行成功！<br><br>画面：${params.prompt || '未指定'}<br><div style="text-align:center;font-size:48px;margin-top:10px;">🖼️</div><br><span style="color:#A89880;">（图片生成结果将在此显示）</span>`;
+  } else if (currentModuleId === 'voice') {
+    resultArea.innerHTML = `🎤 语音生成成功！<br><br>文字：${params.text || '未指定'}<br>语气：${params.tone || '默认'}<br><br><div style="text-align:center;"><button style="padding:8px 20px;background:linear-gradient(135deg,#A8D8F0,#7EC8E3);color:#FFF;border:none;border-radius:16px;font-size:13px;cursor:pointer;">▶ 播放语音</button></div>`;
+  } else {
+    resultArea.innerHTML = `✅ 聊天增强已生效！<br><br>提示词：${params.prompt || '默认'}<br><br>AI伙伴的回复风格已更新～`;
+  }
+  execBtn.disabled = false; execBtn.textContent = '重新执行';
+}
+
+// ========== 初始化 ==========
+const savedAI = localStorage.getItem('hajijiu_aiName');
+if (savedAI) document.getElementById('aiName').textContent = savedAI;
+renderWechatHero();
+
+document.getElementById('moduleModal').addEventListener('click', function(e) { if (e.target === this) closeModuleModal(); });
+document.getElementById('bindModal').addEventListener('click', function(e) { if (e.target === this) closeBindModal(); });
+</script>
+</body>
+</html>

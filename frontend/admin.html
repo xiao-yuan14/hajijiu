@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>管理员后台 - 玖喵WeChat</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', sans-serif;
+  background: #F5F0EB;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* 登录页 */
+.login-page {
+  min-height: 100vh; display: flex; align-items: center; justify-content: center;
+  background: linear-gradient(135deg, #FFF5E6, #FFECD2);
+}
+.login-box {
+  background: #FFF; border-radius: 22px; padding: 36px 28px;
+  width: 90%; max-width: 340px; text-align: center;
+  box-shadow: 0 8px 32px rgba(232,93,58,0.12);
+}
+.login-title { font-size: 22px; font-weight: 800; color: #E85D3A; margin-bottom: 4px; }
+.login-subtitle { font-size: 13px; color: #B8A898; margin-bottom: 24px; }
+.login-input {
+  width: 100%; padding: 14px 16px; border: 2px solid #FFE0B2;
+  border-radius: 14px; font-size: 15px; color: #5D4E3C;
+  background: #FFFBF5; outline: none; margin-bottom: 14px;
+}
+.login-input:focus { border-color: #FFB347; }
+.login-btn {
+  width: 100%; padding: 14px; background: linear-gradient(135deg, #FFB347, #FF8C42);
+  color: #FFF; border: none; border-radius: 14px; font-size: 16px;
+  font-weight: 700; cursor: pointer; box-shadow: 0 4px 14px rgba(255,140,66,0.35);
+  transition: transform 0.15s;
+}
+.login-btn:hover { transform: scale(1.02); }
+.login-error { color: #E53935; font-size: 13px; margin-top: 10px; display: none; }
+
+/* 管理后台主体 */
+.admin-page { display: none; }
+.admin-page.show { display: block; }
+
+/* 顶部栏 */
+.admin-header {
+  background: #FFF; padding: 14px 20px;
+  display: flex; align-items: center; justify-content: space-between;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06); position: sticky; top: 0; z-index: 50;
+}
+.admin-title { font-size: 20px; font-weight: 800; color: #E85D3A; }
+.admin-logout {
+  padding: 6px 14px; background: #FFF; border: 1.5px solid #FFCCBC;
+  border-radius: 12px; color: #E85D3A; font-size: 13px; font-weight: 600;
+  cursor: pointer; transition: all 0.2s;
+}
+.admin-logout:hover { background: #FFEBEE; }
+
+/* Tab导航 */
+.tab-nav {
+  background: #FFF; display: flex; overflow-x: auto;
+  padding: 0 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+  position: sticky; top: 52px; z-index: 49;
+  -webkit-overflow-scrolling: touch;
+}
+.tab-nav::-webkit-scrollbar { display: none; }
+.tab-btn {
+  padding: 12px 16px; font-size: 13px; font-weight: 600;
+  color: #B8A898; background: none; border: none; border-bottom: 3px solid transparent;
+  cursor: pointer; white-space: nowrap; transition: all 0.2s;
+}
+.tab-btn.active { color: #E85D3A; border-bottom-color: #E85D3A; }
+.tab-btn:hover { color: #FF8C42; }
+
+/* Tab内容 */
+.tab-content { display: none; padding: 16px; max-width: 600px; margin: 0 auto; }
+.tab-content.active { display: block; }
+
+/* 卡片 */
+.card {
+  background: #FFF; border-radius: 16px; padding: 20px;
+  margin-bottom: 14px; box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+}
+.card-title {
+  font-size: 16px; font-weight: 700; color: #5D4E3C;
+  margin-bottom: 14px; display: flex; align-items: center; gap: 6px;
+}
+
+/* 数据概览 */
+.stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px; }
+.stat-card {
+  background: #FFFBF5; border-radius: 14px; padding: 16px;
+  border: 1px solid #FFE0B2;
+}
+.stat-value { font-size: 28px; font-weight: 800; color: #E85D3A; }
+.stat-label { font-size: 12px; color: #A89880; margin-top: 4px; }
+.stat-change { font-size: 11px; color: #4CAF50; margin-top: 2px; }
+
+/* 排行 */
+.rank-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 0; border-bottom: 1px solid #FFF0E0;
+}
+.rank-item:last-child { border-bottom: none; }
+.rank-num {
+  width: 22px; height: 22px; border-radius: 50%;
+  background: #FFF3E0; color: #FF8C42; font-size: 12px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+}
+.rank-num.top { background: #FF8C42; color: #FFF; }
+.rank-name { flex: 1; font-size: 14px; color: #5D4E3C; font-weight: 500; }
+.rank-count { font-size: 14px; font-weight: 700; color: #FF8C42; }
+
+/* 表格 */
+.data-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.data-table th {
+  background: #FFFBF5; color: #8B7355; font-weight: 600;
+  padding: 10px 8px; text-align: left; border-bottom: 2px solid #FFE0B2;
+}
+.data-table td {
+  padding: 10px 8px; border-bottom: 1px solid #FFF0E0; color: #5D4E3C;
+}
+.data-table tr:hover { background: #FFFBF5; }
+
+/* 操作按钮 */
+.op-btn {
+  padding: 4px 10px; border: none; border-radius: 8px;
+  font-size: 11px; font-weight: 600; cursor: pointer;
+  transition: transform 0.15s; margin-right: 4px;
+}
+.op-btn:hover { transform: scale(1.05); }
+.op-btn.edit { background: #E3F2FD; color: #42A5F5; }
+.op-btn.toggle { background: #FFF3E0; color: #FF8C42; }
+.op-btn.delete { background: #FFEBEE; color: #E53935; }
+.op-btn.confirm { background: #E8F5E9; color: #4CAF50; }
+.op-btn.reject { background: #FFEBEE; color: #E53935; }
+
+/* 新增按钮 */
+.add-btn {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 10px 20px; background: linear-gradient(135deg, #FFB347, #FF8C42);
+  color: #FFF; border: none; border-radius: 14px;
+  font-size: 14px; font-weight: 600; cursor: pointer;
+  box-shadow: 0 3px 10px rgba(255,140,66,0.3); margin-bottom: 14px;
+  transition: transform 0.15s;
+}
+.add-btn:hover { transform: scale(1.03); }
+
+/* 状态标签 */
+.status-tag {
+  display: inline-block; padding: 2px 8px; border-radius: 8px;
+  font-size: 11px; font-weight: 600;
+}
+.status-tag.online { background: #E8F5E9; color: #4CAF50; }
+.status-tag.offline { background: #F5F5F5; color: #9E9E9E; }
+.status-tag.important { background: #FFEBEE; color: #E53935; }
+.status-tag.normal { background: #FFF3E0; color: #FF8C42; }
+.status-tag.pending { background: #FFF3E0; color: #FF8C42; }
+.status-tag.confirmed { background: #E8F5E9; color: #4CAF50; }
+.status-tag.rejected { background: #FFEBEE; color: #E53935; }
+
+/* 弹窗 */
+.modal-overlay {
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.45); z-index: 200;
+  display: none; align-items: center; justify-content: center;
+}
+.modal-overlay.show { display: flex; }
+.modal-box {
+  background: #FFF; border-radius: 20px; padding: 24px 20px;
+  width: 92%; max-width: 400px; max-height: 85vh; overflow-y: auto;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.15);
+}
+.modal-title { font-size: 18px; font-weight: 700; color: #5D4E3C; margin-bottom: 14px; }
+.form-group { margin-bottom: 12px; }
+.form-label { font-size: 12px; color: #8B7355; font-weight: 600; margin-bottom: 4px; display: block; }
+.form-input {
+  width: 100%; padding: 10px 12px; border: 2px solid #FFE0B2;
+  border-radius: 12px; font-size: 13px; color: #5D4E3C;
+  background: #FFFBF5; outline: none;
+}
+.form-input:focus { border-color: #FFB347; }
+.form-input::placeholder { color: #D4C4B0; }
+textarea.form-input { min-height: 80px; resize: vertical; line-height: 1.5; }
+select.form-input { appearance: none; background-image: url("data:image/svg+xml;utf8,<svg fill='%238B7355' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/></svg>"); background-repeat: no-repeat; background-position: right 10px center; background-size: 18px; }
+.modal-btns { display: flex; gap: 10px; margin-top: 16px; }
+.modal-btn {
+  flex: 1; padding: 12px; border: none; border-radius: 14px;
+  font-size: 14px; font-weight: 600; cursor: pointer; transition: transform 0.15s;
+}
+.modal-btn:hover { transform: scale(1.02); }
+.modal-btn.primary { background: linear-gradient(135deg, #FFB347, #FF8C42); color: #FFF; box-shadow: 0 3px 10px rgba(255,140,66,0.3); }
+.modal-btn.secondary { background: #F5F0EB; color: #8B7355; }
+
+/* 密码修改 */
+.pwd-card .form-group { margin-bottom: 14px; }
+.pwd-success { display: none; text-align: center; padding: 20px; }
+.pwd-success .icon { font-size: 48px; margin-bottom: 10px; }
+.pwd-success .text { font-size: 14px; color: #4CAF50; font-weight: 600; }
+
+/* 空状态 */
+.empty-state { text-align: center; padding: 30px 0; color: #C4B4A0; font-size: 14px; }
+
+/* 截图查看 */
+.screenshot-thumb {
+  width: 60px; height: 60px; border-radius: 8px;
+  background: #F5F0EB; cursor: pointer; object-fit: cover;
+  border: 1px solid #E0D5C8;
+}
+</style>
+</head>
+<body>
+
+<!-- 登录页 -->
+<div class="login-page" id="loginPage">
+  <div class="login-box">
+    <div style="font-size:48px;margin-bottom:10px;">😺</div>
+    <div class="login-title">管理员后台</div>
+    <div class="login-subtitle">请输入管理员密码 ò‿ó</div>
+    <input type="password" class="login-input" id="loginPwd" placeholder="管理员密码" onkeydown="if(event.key==='Enter')doLogin()">
+    <button class="login-btn" onclick="doLogin()">进入后台</button>
+    <div class="login-error" id="loginError">密码错误，请重试</div>
+  </div>
+</div>
+
+<!-- 管理后台 -->
+<div class="admin-page" id="adminPage">
+
+  <div class="admin-header">
+    <div class="admin-title">🛡️ 管理员后台</div>
+    <button class="admin-logout" onclick="doLogout()">退出登录</button>
+  </div>
+
+  <div class="tab-nav">
+    <button class="tab-btn active" onclick="switchTab('overview')">📊 概览</button>
+    <button class="tab-btn" onclick="switchTab('modules')">🧩 模块</button>
+    <button class="tab-btn" onclick="switchTab('announcements')">📢 公告</button>
+    <button class="tab-btn" onclick="switchTab('users')">👥 用户</button>
+    <button class="tab-btn" onclick="switchTab('messages')">💬 留言</button>
+    <button class="tab-btn" onclick="switchTab('payments')">💰 支付</button>
+    <button class="tab-btn" onclick="switchTab('settings')">⚙️ 设置</button>
+  </div>
+
+  <!-- 数据概览 -->
+  <div class="tab-content active" id="tab-overview">
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-value">1,286</div><div class="stat-label">用户总量</div><div class="stat-change">↑ +23 今日</div></div>
+      <div class="stat-card"><div class="stat-value">45.2K</div><div class="stat-label">Token使用</div><div class="stat-change">↑ +3.1K 今日</div></div>
+      <div class="stat-card"><div class="stat-value">¥2,840</div><div class="stat-label">总收入</div><div class="stat-change">↑ +¥156 今日</div></div>
+      <div class="stat-card"><div class="stat-value">856</div><div class="stat-label">周活跃用户</div><div class="stat-change">↑ +12%</div></div>
+    </div>
+    <div class="card">
+      <div class="card-title">🏆 模块销售排行 Top5</div>
+      <div class="rank-item"><span class="rank-num top">1</span><span class="rank-name">聊天增强模块</span><span class="rank-count">523 次</span></div>
+      <div class="rank-item"><span class="rank-num top">2</span><span class="rank-name">绘画模块</span><span class="rank-count">412 次</span></div>
+      <div class="rank-item"><span class="rank-num top">3</span><span class="rank-name">语音模块</span><span class="rank-count">287 次</span></div>
+      <div class="rank-item"><span class="rank-num">4</span><span class="rank-name">记忆增强模块</span><span class="rank-count">156 次</span></div>
+      <div class="rank-item"><span class="rank-num">5</span><span class="rank-name">情感分析模块</span><span class="rank-count">98 次</span></div>
+    </div>
+  </div>
+
+  <!-- 模块管理 -->
+  <div class="tab-content" id="tab-modules">
+    <button class="add-btn" onclick="openModuleModal()">+ 新增模块</button>
+    <div class="card" style="overflow-x:auto;">
+      <table class="data-table">
+        <thead><tr><th>名称</th><th>模型</th><th>售价</th><th>状态</th><th>购买</th><th>操作</th></tr></thead>
+        <tbody id="moduleTableBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 公告管理 -->
+  <div class="tab-content" id="tab-announcements">
+    <button class="add-btn" onclick="openAnnouncementModal()">+ 发布公告</button>
+    <div class="card" style="overflow-x:auto;">
+      <table class="data-table">
+        <thead><tr><th>标题</th><th>类型</th><th>状态</th><th>时间</th><th>操作</th></tr></thead>
+        <tbody id="annTableBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 用户管理 -->
+  <div class="tab-content" id="tab-users">
+    <div class="card" style="overflow-x:auto;">
+      <table class="data-table">
+        <thead><tr><th>昵称</th><th>邮箱</th><th>积分</th><th>状态</th><th>操作</th></tr></thead>
+        <tbody id="userTableBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 留言管理 -->
+  <div class="tab-content" id="tab-messages">
+    <div style="display:flex;gap:8px;margin-bottom:14px;">
+      <button class="tab-btn active" id="msgTabHome" onclick="switchMsgTab('home')" style="border:none;padding:8px 16px;border-radius:12px;background:#FFF3E0;color:#FF8C42;">主页留言</button>
+      <button class="tab-btn" id="msgTabProject" onclick="switchMsgTab('project1')" style="border:none;padding:8px 16px;border-radius:12px;background:#F5F0EB;color:#8B7355;">社区留言</button>
+    </div>
+    <div class="card" id="msgManageList"></div>
+  </div>
+
+  <!-- 支付管理 -->
+  <div class="tab-content" id="tab-payments">
+    <div class="card">
+      <div class="card-title">⏳ 待确认支付</div>
+      <div id="paymentPendingList"></div>
+    </div>
+  </div>
+
+  <!-- 系统设置 -->
+  <div class="tab-content" id="tab-settings">
+    <!-- 修改密码 -->
+    <div class="card pwd-card" id="pwdCard">
+      <div class="card-title">🔐 修改管理员密码</div>
+      <div class="form-group">
+        <label class="form-label">当前密码</label>
+        <input type="password" class="form-input" id="pwdOld" placeholder="输入当前密码">
+      </div>
+      <div class="form-group">
+        <label class="form-label">新密码</label>
+        <input type="password" class="form-input" id="pwdNew" placeholder="输入新密码（至少6位）">
+      </div>
+      <div class="form-group">
+        <label class="form-label">确认新密码</label>
+        <input type="password" class="form-input" id="pwdConfirm" placeholder="再次输入新密码">
+      </div>
+      <div id="pwdError" style="color:#E53935;font-size:12px;margin-bottom:8px;display:none;"></div>
+      <button class="add-btn" onclick="changePassword()" style="width:100%;">保存密码</button>
+    </div>
+    <div class="pwd-success" id="pwdSuccess">
+      <div class="icon">✅</div>
+      <div class="text">密码已修改，请重新登录</div>
+    </div>
+
+    <!-- 签到积分 -->
+    <div class="card">
+      <div class="card-title">🎁 签到积分设置</div>
+      <div class="form-group">
+        <label class="form-label">每日签到奖励积分</label>
+        <input type="number" class="form-input" id="settingCheckinPoints" value="1">
+      </div>
+      <button class="add-btn" onclick="saveSetting('checkin')" style="margin-top:8px;">保存</button>
+    </div>
+
+    <!-- 充值汇率 -->
+    <div class="card">
+      <div class="card-title">💰 充值汇率设置</div>
+      <div class="form-group">
+        <label class="form-label">1元 = 多少积分</label>
+        <input type="number" class="form-input" id="settingPointsRate" value="5">
+      </div>
+      <div class="form-group">
+        <label class="form-label">1元 = 多少聊天条数</label>
+        <input type="number" class="form-input" id="settingQuotaRate" value="288">
+      </div>
+      <button class="add-btn" onclick="saveSetting('rate')" style="margin-top:8px;">保存</button>
+    </div>
+
+    <!-- 收款码设置 -->
+    <div class="card">
+      <div class="card-title">💳 收款码设置</div>
+      <div class="form-group">
+        <label class="form-label">支付宝收款码</label>
+        <input type="file" class="form-input" id="qrAlipay" accept="image/*" style="padding:8px;">
+      </div>
+      <div class="form-group">
+        <label class="form-label">微信收款码</label>
+        <input type="file" class="form-input" id="qrWechat" accept="image/*" style="padding:8px;">
+      </div>
+      <div class="form-group">
+        <label class="form-label">支付说明文字</label>
+        <input type="text" class="form-input" id="payNoteText" value="请备注您的用户名" placeholder="支付说明">
+      </div>
+      <button class="add-btn" onclick="saveSetting('qr')" style="margin-top:8px;">保存收款码</button>
+    </div>
+  </div>
+</div>
+
+<!-- 模块编辑弹窗 -->
+<div class="modal-overlay" id="moduleModal">
+  <div class="modal-box">
+    <div class="modal-title" id="mmTitle">新增模块</div>
+    <div class="form-group"><label class="form-label">模块名称</label><input type="text" class="form-input" id="mmName" placeholder="如：聊天增强模块"></div>
+    <div class="form-group"><label class="form-label">功能介绍</label><input type="text" class="form-input" id="mmFunc" placeholder="一句话描述功能"></div>
+    <div class="form-group"><label class="form-label">调用模型</label><input type="text" class="form-input" id="mmModel" placeholder="如：DeepSeek-Chat"></div>
+    <div class="form-group"><label class="form-label">售价（积分）</label><input type="number" class="form-input" id="mmPrice" placeholder="30"></div>
+    <div class="form-group"><label class="form-label">详细描述</label><textarea class="form-input" id="mmDesc" placeholder="模块详细说明"></textarea></div>
+    <div class="modal-btns">
+      <button class="modal-btn secondary" onclick="closeModuleModal()">取消</button>
+      <button class="modal-btn primary" onclick="saveModule()">保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- 公告编辑弹窗 -->
+<div class="modal-overlay" id="annModal">
+  <div class="modal-box">
+    <div class="modal-title" id="amTitle">发布公告</div>
+    <div class="form-group"><label class="form-label">公告标题</label><input type="text" class="form-input" id="amName" placeholder="公告标题"></div>
+    <div class="form-group"><label class="form-label">公告内容</label><textarea class="form-input" id="amContent" placeholder="公告内容"></textarea></div>
+    <div class="form-group"><label class="form-label">公告类型</label>
+      <select class="form-input" id="amType"><option value="normal">普通</option><option value="important">重要（强制显示）</option></select>
+    </div>
+    <div class="modal-btns">
+      <button class="modal-btn secondary" onclick="closeAnnModal()">取消</button>
+      <button class="modal-btn primary" onclick="saveAnnouncement()">保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- 用户操作弹窗 -->
+<div class="modal-overlay" id="userModal">
+  <div class="modal-box">
+    <div class="modal-title">👤 用户操作</div>
+    <div id="userModalContent"></div>
+    <div class="modal-btns">
+      <button class="modal-btn secondary" onclick="closeUserModal()">关闭</button>
+    </div>
+  </div>
+</div>
+
+<!-- 截图查看弹窗 -->
+<div class="modal-overlay" id="screenshotModal">
+  <div class="modal-box" style="text-align:center;">
+    <div class="modal-title">支付截图</div>
+    <div id="screenshotContent" style="font-size:80px;">📷</div>
+    <div class="modal-btns" style="margin-top:16px;">
+      <button class="modal-btn secondary" onclick="closeScreenshotModal()">关闭</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const ADMIN_PWD_KEY = 'hajijiu_admin_pwd';
+const ADMIN_SESSION = 'hajijiu_admin_session';
+
+// ========== 登录 ==========
+function doLogin() {
+  const pwd = document.getElementById('loginPwd').value;
+  const stored = localStorage.getItem(ADMIN_PWD_KEY) || 'admin123';
+  if (pwd === stored) {
+    sessionStorage.setItem(ADMIN_SESSION, '1');
+    document.getElementById('loginPage').style.display = 'none';
+    document.getElementById('adminPage').classList.add('show');
+    loadAllData();
+  } else {
+    document.getElementById('loginError').style.display = 'block';
+    setTimeout(() => document.getElementById('loginError').style.display = 'none', 2000);
+  }
+}
+
+function doLogout() {
+  sessionStorage.removeItem(ADMIN_SESSION);
+  document.getElementById('adminPage').classList.remove('show');
+  document.getElementById('loginPage').style.display = 'flex';
+  document.getElementById('loginPwd').value = '';
+}
+
+// 检查已登录
+if (sessionStorage.getItem(ADMIN_SESSION) === '1') {
+  document.getElementById('loginPage').style.display = 'none';
+  document.getElementById('adminPage').classList.add('show');
+  setTimeout(loadAllData, 100);
+}
+
+// ========== Tab切换 ==========
+function switchTab(name) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  event.target.classList.add('active');
+  document.getElementById('tab-' + name).classList.add('active');
+}
+
+// ========== 数据 ==========
+let modules = [
+  { id: 'chat_enhance', name: '聊天增强模块', func: '让AI对话更自然有趣', model: 'DeepSeek-Chat', price: 30, status: 'online', purchases: 523, desc: '' },
+  { id: 'drawing', name: '绘画模块', func: 'AI创作精美图片', model: 'DALL-E 3', price: 50, status: 'online', purchases: 412, desc: '' },
+  { id: 'voice', name: '语音模块', func: '语音对话更亲切', model: 'TTS-v3', price: 40, status: 'online', purchases: 287, desc: '' },
+];
+
+let announcements = [
+  { id: 'ann_001', title: '🎉 哈基玖正式上线！', type: 'important', status: 'active', time: '2026-06-27', content: '欢迎来到哈基玖！' },
+  { id: 'ann_002', title: '📌 新模块上线通知', type: 'normal', status: 'active', time: '2026-06-26', content: '绘画模块、语音模块已上架' },
+  { id: 'ann_003', title: '🛠️ 系统维护公告', type: 'important', status: 'disabled', time: '2026-06-25', content: '6月28日凌晨维护' },
+];
+
+let users = [
+  { id: 1, name: '小源同学', email: 'xiaoyuan@example.com', points: 100, status: 'normal', regTime: '2026-05-10' },
+  { id: 2, name: '星空漫步者', email: 'star@example.com', points: 250, status: 'normal', regTime: '2026-05-15' },
+  { id: 3, name: '小鱼干爱好者', email: 'fish@example.com', points: 80, status: 'banned', regTime: '2026-06-01' },
+  { id: 4, name: '画画的小猫', email: 'drawcat@example.com', points: 320, status: 'normal', regTime: '2026-06-10' },
+];
+
+let currentMsgTab = 'home';
+
+function loadAllData() {
+  renderModules();
+  renderAnnouncements();
+  renderUsers();
+  renderMessages();
+  renderPayments();
+}
+
+// ========== 模块管理 ==========
+function renderModules() {
+  const tbody = document.getElementById('moduleTableBody');
+  tbody.innerHTML = modules.map(m => `
+    <tr>
+      <td><b>${m.name}</b></td>
+      <td>${m.model}</td>
+      <td>${m.price}积分</td>
+      <td><span class="status-tag ${m.status}">${m.status === 'online' ? '上架' : '下架'}</span></td>
+      <td>${m.purchases}</td>
+      <td>
+        <button class="op-btn edit" onclick="editModule('${m.id}')">编辑</button>
+        <button class="op-btn toggle" onclick="toggleModule('${m.id}')">${m.status === 'online' ? '下架' : '上架'}</button>
+        <button class="op-btn delete" onclick="deleteModule('${m.id}')">删除</button>
+      </td>
+    </tr>`).join('');
+}
+
+let editModuleId = null;
+function openModuleModal(id) {
+  editModuleId = id || null;
+  if (id) {
+    const m = modules.find(x => x.id === id);
+    document.getElementById('mmTitle').textContent = '编辑模块';
+    document.getElementById('mmName').value = m.name;
+    document.getElementById('mmFunc').value = m.func;
+    document.getElementById('mmModel').value = m.model;
+    document.getElementById('mmPrice').value = m.price;
+    document.getElementById('mmDesc').value = m.desc;
+  } else {
+    document.getElementById('mmTitle').textContent = '新增模块';
+    document.getElementById('mmName').value = '';
+    document.getElementById('mmFunc').value = '';
+    document.getElementById('mmModel').value = '';
+    document.getElementById('mmPrice').value = '';
+    document.getElementById('mmDesc').value = '';
+  }
+  document.getElementById('moduleModal').classList.add('show');
+}
+function closeModuleModal() { document.getElementById('moduleModal').classList.remove('show'); }
+function editModule(id) { openModuleModal(id); }
+function toggleModule(id) {
+  const m = modules.find(x => x.id === id);
+  m.status = m.status === 'online' ? 'offline' : 'online';
+  renderModules();
+}
+function deleteModule(id) {
+  if (!confirm('确定删除此模块？')) return;
+  modules = modules.filter(x => x.id !== id);
+  renderModules();
+}
+function saveModule() {
+  const name = document.getElementById('mmName').value.trim();
+  const func = document.getElementById('mmFunc').value.trim();
+  const model = document.getElementById('mmModel').value.trim();
+  const price = parseInt(document.getElementById('mmPrice').value);
+  const desc = document.getElementById('mmDesc').value.trim();
+  if (!name) { alert('请输入模块名称'); return; }
+
+  if (editModuleId) {
+    const m = modules.find(x => x.id === editModuleId);
+    Object.assign(m, { name, func, model, price, desc });
+  } else {
+    modules.push({ id: 'mod_' + Date.now(), name, func, model, price, status: 'online', purchases: 0, desc });
+  }
+  closeModuleModal();
+  renderModules();
+}
+
+// ========== 公告管理 ==========
+function renderAnnouncements() {
+  const tbody = document.getElementById('annTableBody');
+  tbody.innerHTML = announcements.map(a => `
+    <tr>
+      <td><b>${a.title}</b></td>
+      <td><span class="status-tag ${a.type}">${a.type === 'important' ? '重要' : '普通'}</span></td>
+      <td><span class="status-tag ${a.status === 'active' ? 'online' : 'offline'}">${a.status === 'active' ? '启用' : '禁用'}</span></td>
+      <td>${a.time}</td>
+      <td>
+        <button class="op-btn edit" onclick="editAnnouncement('${a.id}')">编辑</button>
+        <button class="op-btn toggle" onclick="toggleAnn('${a.id}')">${a.status === 'active' ? '禁用' : '启用'}</button>
+        <button class="op-btn delete" onclick="deleteAnn('${a.id}')">删除</button>
+      </td>
+    </tr>`).join('');
+}
+
+let editAnnId = null;
+function openAnnouncementModal(id) {
+  editAnnId = id || null;
+  if (id) {
+    const a = announcements.find(x => x.id === id);
+    document.getElementById('amTitle').textContent = '编辑公告';
+    document.getElementById('amName').value = a.title;
+    document.getElementById('amContent').value = a.content;
+    document.getElementById('amType').value = a.type;
+  } else {
+    document.getElementById('amTitle').textContent = '发布公告';
+    document.getElementById('amName').value = '';
+    document.getElementById('amContent').value = '';
+    document.getElementById('amType').value = 'normal';
+  }
+  document.getElementById('annModal').classList.add('show');
+}
+function closeAnnModal() { document.getElementById('annModal').classList.remove('show'); }
+function editAnnouncement(id) { openAnnouncementModal(id); }
+function toggleAnn(id) {
+  const a = announcements.find(x => x.id === id);
+  a.status = a.status === 'active' ? 'disabled' : 'active';
+  // 同步更新 localStorage 中的公告
+  localStorage.setItem('hajijiu_announcements', JSON.stringify(announcements));
+  renderAnnouncements();
+}
+function deleteAnn(id) {
+  if (!confirm('确定删除此公告？')) return;
+  announcements = announcements.filter(x => x.id !== id);
+  localStorage.setItem('hajijiu_announcements', JSON.stringify(announcements));
+  renderAnnouncements();
+}
+function saveAnnouncement() {
+  const title = document.getElementById('amName').value.trim();
+  const content = document.getElementById('amContent').value.trim();
+  const type = document.getElementById('amType').value;
+  if (!title) { alert('请输入公告标题'); return; }
+  const now = new Date();
+  const timeStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+  if (editAnnId) {
+    const a = announcements.find(x => x.id === editAnnId);
+    Object.assign(a, { title, content, type });
+  } else {
+    announcements.unshift({ id: 'ann_' + Date.now(), title, content, type, status: 'active', time: timeStr });
+  }
+  localStorage.setItem('hajijiu_announcements', JSON.stringify(announcements));
+  closeAnnModal();
+  renderAnnouncements();
+}
+
+// ========== 用户管理 ==========
+function renderUsers() {
+  const tbody = document.getElementById('userTableBody');
+  tbody.innerHTML = users.map(u => `
+    <tr>
+      <td><b>${u.name}</b></td>
+      <td>${u.email || '-'}</td>
+      <td>${u.points}</td>
+      <td><span class="status-tag ${u.status === 'normal' ? 'online' : 'rejected'}">${u.status === 'normal' ? '正常' : '封禁'}</span></td>
+      <td>
+        <button class="op-btn edit" onclick="viewUser(${u.id})">详情</button>
+        <button class="op-btn toggle" onclick="toggleUser(${u.id})">${u.status === 'normal' ? '封禁' : '解封'}</button>
+        <button class="op-btn edit" onclick="adjustPoints(${u.id})">积分</button>
+      </td>
+    </tr>`).join('');
+}
+function viewUser(id) {
+  const u = users.find(x => x.id === id);
+  document.getElementById('userModalContent').innerHTML = `
+    <div style="font-size:15px;margin-bottom:12px;"><b>${u.name}</b></div>
+    <div style="font-size:13px;color:#8B7355;line-height:2;">
+      📧 邮箱：${u.email || '未绑定'}<br>
+      💰 积分：${u.points}<br>
+    📅 注册时间：${u.regTime}<br>
+      📊 状态：${u.status === 'normal' ? '正常' : '已封禁'}
+    </div>`;
+  document.getElementById('userModal').classList.add('show');
+}
+function closeUserModal() { document.getElementById('userModal').classList.remove('show'); }
+function toggleUser(id) {
+  const u = users.find(x => x.id === id);
+  u.status = u.status === 'normal' ? 'banned' : 'normal';
+  renderUsers();
+}
+function adjustPoints(id) {
+  const val = prompt('输入调整后的积分值：');
+  if (val === null) return;
+  const u = users.find(x => x.id === id);
+  u.points = parseInt(val) || 0;
+  renderUsers();
+}
+
+// ========== 留言管理 ==========
+function switchMsgTab(tab) {
+  currentMsgTab = tab;
+  document.getElementById('msgTabHome').style.background = tab === 'home' ? '#FFF3E0' : '#F5F0EB';
+  document.getElementById('msgTabHome').style.color = tab === 'home' ? '#FF8C42' : '#8B7355';
+  document.getElementById('msgTabProject').style.background = tab === 'project1' ? '#FFF3E0' : '#F5F0EB';
+  document.getElementById('msgTabProject').style.color = tab === 'project1' ? '#FF8C42' : '#8B7355';
+  renderMessages();
+}
+
+function renderMessages() {
+  const key = currentMsgTab === 'home' ? 'hajijiu_messages_home' : 'hajijiu_messages_project1';
+  const label = currentMsgTab === 'home' ? '主页' : '社区';
+  const raw = localStorage.getItem(key);
+  const msgs = raw ? JSON.parse(raw) : [];
+  const container = document.getElementById('msgManageList');
+
+  if (msgs.length === 0) {
+    container.innerHTML = `<div class="empty-state">${label}暂无留言</div>`;
+    return;
+  }
+  container.innerHTML = msgs.map((m, i) => `
+    <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #FFF0E0;">
+      <div style="flex:1;"><b style="font-size:13px;color:#5D4E3C;">${m.name}</b><div style="font-size:12px;color:#8B7355;margin-top:2px;">${m.text}</div><div style="font-size:11px;color:#C4B4A0;">${m.time}</div></div>
+      <button class="op-btn delete" onclick="deleteMsg('${key}',${i})">删除</button>
+    </div>`).join('');
+}
+
+function deleteMsg(key, idx) {
+  const raw = localStorage.getItem(key);
+  const msgs = raw ? JSON.parse(raw) : [];
+  msgs.splice(idx, 1);
+  localStorage.setItem(key, JSON.stringify(msgs));
+  renderMessages();
+}
+
+// ========== 支付管理 ==========
+function renderPayments() {
+  const orders = JSON.parse(localStorage.getItem('hajijiu_orders') || '[]');
+  const pending = orders.filter(o => o.status === 'pending');
+  const container = document.getElementById('paymentPendingList');
+
+  if (pending.length === 0) {
+    container.innerHTML = '<div class="empty-state">暂无待确认支付</div>';
+    return;
+  }
+  container.innerHTML = pending.map(o => `
+    <div style="display:flex;align-items:center;gap:10px;padding:12px 0;border-bottom:1px solid #FFF0E0;">
+      <div style="flex:1;">
+        <b style="font-size:13px;color:#5D4E3C;">${o.userName}</b>
+        <span class="status-tag ${o.type}" style="margin-left:6px;">${o.type === 'points' ? '积分' : '聊天次数'}</span>
+        <div style="font-size:12px;color:#8B7355;margin-top:4px;">${o.type === 'points' ? o.amount + '积分' : o.amount + '条'} / ¥${o.yuan.toFixed(2)}</div>
+        <div style="font-size:11px;color:#C4B4A0;">${o.time}</div>
+      </div>
+      <span class="screenshot-thumb" onclick="viewScreenshot()">📷</span>
+      <button class="op-btn confirm" onclick="confirmPayment('${o.id}')">确认</button>
+      <button class="op-btn reject" onclick="rejectPayment('${o.id}')">拒绝</button>
+    </div>`).join('');
+}
+
+function viewScreenshot() {
+  document.getElementById('screenshotContent').innerHTML = '📷<div style="font-size:14px;color:#C4B4A0;margin-top:8px;">截图预览（需后端支持）</div>';
+  document.getElementById('screenshotModal').classList.add('show');
+}
+function closeScreenshotModal() { document.getElementById('screenshotModal').classList.remove('show'); }
+
+function confirmPayment(orderId) {
+  const orders = JSON.parse(localStorage.getItem('hajijiu_orders') || '[]');
+  const order = orders.find(o => o.id === orderId);
+  if (order) {
+    order.status = 'confirmed';
+    // 自动给用户增加积分或次数
+    if (order.type === 'points') {
+      const current = parseInt(localStorage.getItem('hajijiu_points') || '100');
+      localStorage.setItem('hajijiu_points', String(current + order.amount));
+    } else {
+      const raw = localStorage.getItem('hajijiu_chat_quota');
+      const quota = raw ? JSON.parse(raw) : { free: 200, paid: 0 };
+      quota.paid += order.amount;
+      localStorage.setItem('hajijiu_chat_quota', JSON.stringify(quota));
+    }
+  }
+  localStorage.setItem('hajijiu_orders', JSON.stringify(orders));
+  renderPayments();
+}
+
+function rejectPayment(orderId) {
+  if (!confirm('确定拒绝此支付？')) return;
+  const orders = JSON.parse(localStorage.getItem('hajijiu_orders') || '[]');
+  const order = orders.find(o => o.id === orderId);
+  if (order) order.status = 'rejected';
+  localStorage.setItem('hajijiu_orders', JSON.stringify(orders));
+  renderPayments();
+}
+
+// ========== 密码修改 ==========
+function changePassword() {
+  const old = document.getElementById('pwdOld').value;
+  const newPwd = document.getElementById('pwdNew').value;
+  const confirm = document.getElementById('pwdConfirm').value;
+  const errorEl = document.getElementById('pwdError');
+
+  if (!newPwd || newPwd.length < 6) {
+    errorEl.textContent = '新密码不能为空且至少6位';
+    errorEl.style.display = 'block'; return;
+  }
+  if (newPwd !== confirm) {
+    errorEl.textContent = '两次输入的新密码不一致';
+    errorEl.style.display = 'block'; return;
+  }
+  const stored = localStorage.getItem(ADMIN_PWD_KEY) || 'admin123';
+  if (old !== stored) {
+    errorEl.textContent = '当前密码错误';
+    errorEl.style.display = 'block'; return;
+  }
+
+  // TODO: POST /api/admin/change-password
+  localStorage.setItem(ADMIN_PWD_KEY, newPwd);
+  document.getElementById('pwdCard').style.display = 'none';
+  document.getElementById('pwdSuccess').style.display = 'block';
+  setTimeout(() => doLogout(), 2000);
+}
+
+// ========== 系统设置 ==========
+function saveSetting(type) {
+  if (type === 'checkin') {
+    const val = document.getElementById('settingCheckinPoints').value;
+    localStorage.setItem('hajijiu_setting_checkin', val);
+  } else if (type === 'rate') {
+    const points = document.getElementById('settingPointsRate').value;
+    const quota = document.getElementById('settingQuotaRate').value;
+    localStorage.setItem('hajijiu_setting_points_rate', points);
+    localStorage.setItem('hajijiu_setting_quota_rate', quota);
+  } else if (type === 'qr') {
+    localStorage.setItem('hajijiu_setting_pay_note', document.getElementById('payNoteText').value);
+    // 文件上传需后端支持
+  }
+  alert('保存成功！');
+}
+
+// 点击遮罩关闭弹窗
+document.querySelectorAll('.modal-overlay').forEach(overlay => {
+  overlay.addEventListener('click', function(e) {
+    if (e.target === this) this.classList.remove('show');
+  });
+});
+</script>
+</body>
+</html>
