@@ -533,6 +533,12 @@ def init_database():
         logger.info("数据库初始化完成")
 
 
+
+# Railway 健康检查端点
+@app.get("/health")
+def health_check():
+    return {"status": "ok", "service": "hajijiu-api"}
+
 @app.on_event("startup")
 async def startup():
     init_database()
