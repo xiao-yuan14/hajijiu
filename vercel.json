@@ -4,19 +4,11 @@
       "maxDuration": 30
     }
   },
-  "routes": [
-    { "src": "/api/(.*)", "dest": "/api/index.py" },
-    { "src": "/health", "dest": "/api/index.py" },
-    { "src": "/docs", "dest": "/api/index.py" },
-    { "src": "/openapi.json", "dest": "/api/index.py" },
-    { "src": "/redoc", "dest": "/api/index.py" },
-    { "src": "/(.+\\.html)", "dest": "/$1" },
-    { "src": "/(.+\\.css)", "dest": "/$1" },
-    { "src": "/(.+\\.js)", "dest": "/$1" },
-    { "src": "/(.+\\.png)", "dest": "/$1" },
-    { "src": "/(.+\\.jpg)", "dest": "/$1" },
-    { "src": "/(.+\\.svg)", "dest": "/$1" },
-    { "src": "/(.+\\.ico)", "dest": "/$1" },
-    { "src": "/", "dest": "/index.html" }
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "/api/index.py" },
+    { "source": "/health", "destination": "/api/index.py" },
+    { "source": "/docs", "destination": "/api/index.py" },
+    { "source": "/openapi.json", "destination": "/api/index.py" },
+    { "source": "/redoc", "destination": "/api/index.py" }
   ]
 }
