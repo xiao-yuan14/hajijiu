@@ -13,14 +13,16 @@ from datetime import date, datetime, timedelta
 from typing import Optional, List
 from contextlib import contextmanager
 
-from fastapi import FastAPI, HTTPException, Depends, Header, Query
+from fastapi import FastAPI, HTTPException, Depends, Header, Query, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 import psycopg2
 from psycopg2.extras import RealDictCursor
 from dotenv import load_dotenv
 import bcrypt
 import requests as http_requests
+import httpx
 
 # ─── 环境变量 ──────────────────────────────────────────────────────────
 load_dotenv()
@@ -1811,6 +1813,38 @@ async def admin_delete_recharge_tier(tier_id: int, admin: dict = Depends(get_adm
         r = cur.fetchone()
     if not r: return error_response("充值档位不存在")
     return success_response({"id": tier_id}, "充值档位删除成功")
+
+
+# ═══════════════════════════════════════════════════════════════════════
+# 微信扫码API代理（转发到阿里云服务器）
+# ═══════════════════════════════════════════════════════════════════════
+
+WECHAT_API_BASE = "http://8.138.219.56:8000"
+
+
+@app.post("/api/wechat/qr")
+async def proxy_wechat_qr(request: Request):
+    """代理：获取微信登录二维码"""
+    async with httpx.AsyncClient(timeout=30) as client:
+        resp = await client.post(f"{WECHAT_API_BASE}/api/wechat/qr")
+    return JSONResponse(content=resp.json(), status_code=resp.status_code)
+
+
+@app.get("/api/wechat/qr/status")
+async def proxy_wechat_qr_status(session_key: str = Query(...)):
+    """代理：轮询扫码状态"""
+    async with httpx.AsyncClient(timeout=30) as client:
+        resp = await client.get(f"{WECHAT_API_BASE}/api/wechat/qr/status", params={"session_key": session_key})
+    return JSONResponse(content=resp.json(), status_code=resp.status_code)
+
+
+@app.post("/api/wechat/qr/verify")
+async def proxy_wechat_qr_verify(request: Request):
+    """代理：提交验证码"""
+    body = await request.json()
+    async with httpx.AsyncClient(timeout=30) as client:
+        resp = await client.post(f"{WECHAT_API_BASE}/api/wechat/qr/verify", json=body)
+    return JSONResponse(content=resp.json(), status_code=resp.status_code)
 
 
 # ═══════════════════════════════════════════════════════════════════════
