@@ -28,10 +28,10 @@ load_dotenv()
 
 DATABASE_URL = os.getenv(
     "DATABASE_URL",
-    "postgresql://neondb_owner:REDACTED@ep-cold-union-atyqklo2-pooler.c-9.us-east-1.aws.neon.tech/neondb?sslmode=require",
+    "postgresql://neondb_owner:npg_mHMz8DAUwv8cY629IM1W@ep-cold-union-atyqklo2-pooler.c-9.us-east-1.aws.neon.tech/neondb?sslmode=require",
 )
-ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "REDACTED_ADMIN")
-JWT_SECRET = os.getenv("JWT_SECRET", "REDACTED_JWT")
+ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "admin123")
+JWT_SECRET = os.getenv("JWT_SECRET", "hajijiu_jwt_secret_2026")
 
 # DeepSeek API Key 从数据库读取（管理员后台配置）
 def get_deepseek_api_key():
